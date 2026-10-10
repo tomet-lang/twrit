@@ -53,6 +53,8 @@ The sibling `../tomet` repository is both the language this reads and the
 first consumer of this tool. Its `.writ.tmt` files are the working examples;
 read them before changing how writs are parsed.
 
+Read `CONTRIBUTING.md` for the contribution workflow, commit conventions, and verification steps.
+
 ## The two repositories
 
 `.cargo/config.toml` carries a `[patch]` pointing the tomet git dependency
@@ -328,8 +330,10 @@ deleted.
 The repository uses Jujutsu (`jj`) in colocated mode with Git.
 
 - Favor a branchless workflow. Do not create named Git branches for regular agent tasks.
-- All commit messages must follow the convention in `type(scope): description` (e.g. `feat(cli): add list command`, `fix(guard): handle door`).
+- All commit messages must follow the convention in `CONTRIBUTING.md`: `type(scope): description` (e.g. `feat(cli): add list command`, `fix(guard): handle door`).
 - Use `jj describe -m "..."` to set commit messages, and `jj new` to advance to subsequent revisions.
+- Always pass `--no-pager` to `jj` subcommands (e.g. `jj status --no-pager`, `jj log --no-pager`) — without it, output can hang waiting on a pager in non-interactive/agent sessions.
+- If `jj status`/`jj diff` shows changes you did not make, treat them as another person's in-progress work, not as drift to clean up. Always confirm with the user before reverting, restoring, or overwriting them.
 - Never commit automatically or on your own initiative. Always ask and get explicit confirmation from the user before finalizing commits or descriptions.
 - Do not put `Claude-Session:` or `Co-Authored-By: Claude` trailers in commit
 messages. The session trailer embeds a URL, and a commit message is
