@@ -293,14 +293,32 @@ fn collect_rule_elements<'a>(
                 if let Some(content) = &el.content {
                     collect_rule_elements(content, is_rule, out);
                 }
-                if let Some(children) = &el.children {
-                    collect_rule_elements(children, is_rule, out);
-                }
             }
             Block::Section(sec) => {
                 collect_rule_elements(&sec.blocks, is_rule, out);
             }
+            Block::List(list) => {
+                collect_rule_list(list, is_rule, out);
+            }
             Block::Paragraph(_) => {}
+        }
+    }
+}
+
+fn collect_rule_list<'a>(
+    list: &'a tomet_ast::List,
+    is_rule: &impl Fn(&Element) -> bool,
+    out: &mut Vec<&'a Element>,
+) {
+    for item in &list.items {
+        if is_rule(&item.element) {
+            out.push(&item.element);
+        }
+        if let Some(content) = &item.element.content {
+            collect_rule_elements(content, is_rule, out);
+        }
+        if let Some(sublist) = &item.sublist {
+            collect_rule_list(sublist, is_rule, out);
         }
     }
 }

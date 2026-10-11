@@ -21,7 +21,6 @@ twrit = { path = "crates/twrit" }
 twrit-rust = { path = "crates/twrit-rust" }
 twrit-cli = { path = "app" }
 
-
 #= Tomet
 tomet-ast = { git = "https://github.com/tomet-lang/tomet.git" }
 tomet-load = { git = "https://github.com/tomet-lang/tomet.git" }
