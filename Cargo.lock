@@ -701,6 +701,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "tomet-formatter"
+version = "0.1.0"
+source = "git+https://github.com/tomet-lang/tomet.git#f3dedb2c662736fccae62324fa0949f531e8a2e0"
+dependencies = [
+ "tomet-ast",
+ "tomet-config",
+ "tomet-parser",
+ "unicode-width",
+]
+
+[[package]]
 name = "tomet-indexer"
 version = "0.1.0"
 source = "git+https://github.com/tomet-lang/tomet.git#f3dedb2c662736fccae62324fa0949f531e8a2e0"
@@ -759,6 +770,20 @@ dependencies = [
  "tomet-tree",
  "tove",
  "unicode-width",
+]
+
+[[package]]
+name = "tomet-printer"
+version = "0.1.0"
+source = "git+https://github.com/tomet-lang/tomet.git#f3dedb2c662736fccae62324fa0949f531e8a2e0"
+dependencies = [
+ "tomet-ast",
+ "tomet-config",
+ "tomet-field-utils",
+ "tomet-formatter",
+ "tomet-semantics",
+ "tomet-style",
+ "tomet-tree",
 ]
 
 [[package]]
@@ -868,8 +893,14 @@ dependencies = [
  "anyhow",
  "cargo_metadata",
  "ignore",
+ "syn 2.0.119",
  "tomet-ast",
+ "tomet-formatter",
+ "tomet-parser",
+ "tomet-printer",
+ "tomet-tree",
  "twrit",
+ "walkdir",
 ]
 
 [[package]]

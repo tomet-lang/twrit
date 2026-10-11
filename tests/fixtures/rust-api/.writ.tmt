@@ -1,0 +1,12 @@
+@kind(writ)
+
+=[ Writ: rust-api fixture ]
+
+==[ rust-api ]
+
+@rule(rust-api-docs){
+  guard: { twrit: rust-api }
+  rust_api: {
+    out: "docs/crates"
+  }
+}

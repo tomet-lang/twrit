@@ -119,6 +119,19 @@ impl Rule {
             _ => None,
         })
     }
+
+    /// A top-level entry value from this rule's own group.
+    pub fn get(&self, key: &str) -> Option<&Value> {
+        self.group.iter().find_map(|entry| match entry {
+            Entry::Pair(k, v) if k == key => Some(v),
+            _ => None,
+        })
+    }
+
+    /// All entries declared in this rule's `{...}` group.
+    pub fn group(&self) -> &[Entry] {
+        &self.group
+    }
 }
 
 /// Every `.writ.tmt` at or below `root`, in walk order.
@@ -252,6 +265,45 @@ pub fn as_list(value: &Value) -> Option<&[Value]> {
     }
 }
 
+/// Extracts a list of strings from either a `Value::Seq`, a `list(...)` call,
+/// or bracketed `Value::Blocks`.
+pub fn as_string_list(value: &Value) -> Option<Vec<String>> {
+    if let Some(items) = as_list(value) {
+        let mut strings = Vec::new();
+        for item in items {
+            if let Value::String(s) = item {
+                strings.push(s.clone());
+            } else {
+                return None;
+            }
+        }
+        return Some(strings);
+    }
+
+    if let Value::Blocks(blocks) = value {
+        let mut strings = Vec::new();
+        for b in blocks {
+            if let Block::Paragraph(p) = b {
+                for inline in &p.content {
+                    if let tomet_ast::Inline::Text(t) = inline {
+                        for part in t.value.split(',') {
+                            let trimmed = part.trim().trim_matches('"').trim_matches('\'');
+                            if !trimmed.is_empty() {
+                                strings.push(trimmed.to_string());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if !strings.is_empty() {
+            return Some(strings);
+        }
+    }
+
+    None
+}
+
 /// Reads a rule parameter's `{...}` as `key: [string, ...]` pairs.
 ///
 /// Returns an error rather than skipping anything it cannot read: a rule
@@ -264,17 +316,22 @@ pub fn string_list_map(
     entries
         .iter()
         .map(|(key, value)| {
-            let Some(items) = as_list(value) else {
-                anyhow::bail!("{what}'s `{key}` is not a list");
-            };
-            let strings = items
-                .iter()
-                .map(|item| match item {
-                    Value::String(s) => Ok(s.clone()),
-                    other => anyhow::bail!("{what}'s `{key}` holds a non-string entry: {other:?}"),
-                })
-                .collect::<Result<Vec<_>>>()?;
-            Ok((key.clone(), strings))
+            if let Some(items) = as_list(value) {
+                let strings = items
+                    .iter()
+                    .map(|item| match item {
+                        Value::String(s) => Ok(s.clone()),
+                        other => {
+                            anyhow::bail!("{what}'s `{key}` holds a non-string entry: {other:?}")
+                        }
+                    })
+                    .collect::<Result<Vec<_>>>()?;
+                return Ok((key.clone(), strings));
+            }
+            if let Some(strings) = as_string_list(value) {
+                return Ok((key.clone(), strings));
+            }
+            anyhow::bail!("{what}'s `{key}` is not a list");
         })
         .collect()
 }

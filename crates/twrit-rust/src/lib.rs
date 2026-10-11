@@ -1,5 +1,6 @@
 //! `twrit-rust` -- Rust workspace rules enforcement (layering, door, purity).
 
+pub mod api;
 pub mod door;
 pub mod layering;
 pub mod purity;
@@ -22,6 +23,11 @@ pub fn rust_guards() -> Vec<Guard> {
             kind: "door",
             singleton: false,
             check: door::check,
+        },
+        Guard {
+            kind: "rust-api",
+            singleton: false,
+            check: api::check,
         },
     ]
 }

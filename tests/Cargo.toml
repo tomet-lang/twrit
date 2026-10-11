@@ -15,6 +15,10 @@ autobenches = false
 path = "src/lib.rs"
 
 [[test]]
+name = "api"
+path = "src/api.rs"
+
+[[test]]
 name = "door"
 path = "src/door.rs"
 

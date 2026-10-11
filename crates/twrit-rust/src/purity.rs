@@ -65,16 +65,19 @@ impl Pure {
 }
 
 fn strings(key: &str, value: &Value) -> Result<Vec<String>> {
-    let Some(items) = twrit::writ::as_list(value) else {
-        anyhow::bail!("`pure`'s `{key}` is not a list");
-    };
-    items
-        .iter()
-        .map(|item| match item {
-            Value::String(s) => Ok(s.clone()),
-            other => anyhow::bail!("`pure`'s `{key}` holds a non-string entry: {other:?}"),
-        })
-        .collect()
+    if let Some(items) = twrit::writ::as_list(value) {
+        return items
+            .iter()
+            .map(|item| match item {
+                Value::String(s) => Ok(s.clone()),
+                other => anyhow::bail!("`pure`'s `{key}` holds a non-string entry: {other:?}"),
+            })
+            .collect();
+    }
+    if let Some(items) = twrit::writ::as_string_list(value) {
+        return Ok(items);
+    }
+    anyhow::bail!("`pure`'s `{key}` is not a list");
 }
 
 /// Runs every `pure` declared across `writs`.

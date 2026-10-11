@@ -8,8 +8,14 @@ twrit = { workspace = true }
 
 #= Tomet
 tomet-ast = { workspace = true }
+tomet-formatter = { workspace = true }
+tomet-parser = { workspace = true }
+tomet-printer = { workspace = true }
+tomet-tree = { workspace = true }
 
 #= Crates.io
 anyhow = { workspace = true }
 cargo_metadata = { workspace = true }
 ignore = { workspace = true }
+syn = { workspace = true }
+walkdir = { workspace = true }

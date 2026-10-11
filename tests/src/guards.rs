@@ -321,7 +321,7 @@ fn a_twrit_kind_this_tool_does_not_have_is_refused() {
         twrit_tests::check_err("rule-unknown-kind"),
         format!(
             "{}: `@rule(import-cycles)` names `twrit: cycles`, which this tool does not \
-              implement; it implements layers, pure, door, placement",
+              implement; it implements layers, pure, door, rust-api, placement",
             twrit_tests::fixture("rule-unknown-kind")
                 .join(".writ.tmt")
                 .display()
