@@ -1,0 +1,5 @@
+@kind(api)
+
+@meta{crate: twrit-cli, dependencies: list(twrit, twrit-rust), dependents: list()}
+
+=[twrit-cli]

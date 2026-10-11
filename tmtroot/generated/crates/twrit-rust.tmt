@@ -1,0 +1,144 @@
+@kind(api)
+
+@meta{crate: twrit-rust, dependencies: list(twrit), dependents: list(twrit-cli, twrit-tests)}
+
+=[twrit-rust]
+
+`twrit-rust` -- Rust workspace rules enforcement (layering, door, purity).
+
+==[Module api]
+
+`rust-api` guard and documentation generator.
+
+Extracts Tomet API documentation (`@kind(api)`) from Rust crates using `syn`,
+traverses crate and module hierarchies, inspects item visibilities (`pub`),
+and extracts doc-comments (`//!` and `///`).
+
+Enforces that generated `.tmt` files in the repository match the current source
+code and doc-comments.
+
+===[Structs]
+
+====[struct RustExtractOptions]
+
+Options controlling extraction of Rust code documentation.
+
+====[struct RustCrateSource]
+
+In-memory representation of a Rust crate source code.
+
+====[struct RustApiConfig]
+
+Configuration for `rust-api` read from a Rule.
+
+===[Functions]
+
+====[fn extract_file_doc]
+
+Extracts documentation for a single Rust source code string into a Tomet [`Document`].
+
+====[fn extract_crate_doc]
+
+Extracts documentation from an entire Rust crate into a single unified Tomet [`Document`].
+
+====[fn format_document]
+
+Formats a parsed AST [`Document`] into a formatted Tomet string.
+
+====[fn load_workspace_crates]
+
+Loads crate source files and workspace dependency graph using `cargo_metadata`.
+
+====[fn check]
+
+Guard check implementation for `rust-api`.
+
+====[fn generate]
+
+Generates and writes `.tmt` files for all crates, returning the count of written files.
+
+====[fn generate_to]
+
+Generates and writes `.tmt` files to `out_dir`.
+
+==[Module door]
+
+A capability's allowed locations, and everyone else held to not having
+it.
+
+The rule this exists for was written in prose and could not fail.
+`tomet`'s `parser-purity` says file resolution is
+"`tomet-semantics-resolver`'s job -- and the only place reading a
+referenced file is allowed". Five crates touch `fs`. The sentence was
+true when it was written, a second place appeared, and nothing
+reported it, because a sentence has no way to notice.
+
+The difference from `pure` is the quantifier, and it is the whole
+point. `pure` checks the crates it names: a crate that acquires an
+ability without being named stays invisible to it. `door` names the
+crates that @em[may] have the ability and checks every other member of
+the workspace, so a new one arriving is what fails.
+
+===[Functions]
+
+====[fn check]
+
+==[Module layering]
+
+The `crate-layering` guard.
+
+Two checks over one `layers` declaration:
+
+1. @strong[Exhaustiveness] -- every workspace member matches exactly one
+layer. This is the half that catches a rule that was never written,
+rather than one that was broken, and it is why the layering rule is
+worth guarding before any other.
+2. @strong[Direction] -- a member's `[dependencies]` may only resolve to its
+own layer or below.
+
+`[dev-dependencies]` are exempt, because a crate reaching up to the
+parser to test itself says nothing about how the shipped code is
+arranged.
+
+===[Functions]
+
+====[fn check]
+
+Runs the guard against the workspace whose manifest is at
+`workspace_root/Cargo.toml`.
+
+`Outcome::NotDeclared` when no rule guards `layers` -- not an empty
+violation list, which would be indistinguishable from a workspace
+whose every edge runs the right way.
+
+==[Module purity]
+
+The `pure` guard: crates that may not reach the outside world.
+
+Two halves, because there are two ways to acquire the ability:
+
+1. @strong[`allow-external`] -- every external crate in the dependency
+closure is named there. Something new cannot arrive without a
+decision, which is the property; "no external crates at all" would be
+a nicer sentence and a false one.
+2. @strong[`forbid`] -- none of the named paths appears in the crate's
+source, so it cannot be done bare-handed either.
+
+Neither name nor path is written here. Which crates, and which paths,
+are `pure` data in the writ -- see `AGENTS.md`'s "What belongs in this
+tool".
+
+===[Functions]
+
+====[fn check]
+
+Runs every `pure` declared across `writs`.
+
+`Outcome::NotDeclared` when no writ carries one, for the same reason
+`crate-layering` does: an empty violation list is what a guard that
+checked everything returns, and what one that checked nothing
+returns, and they are not the same answer.
+
+==[Functions]
+
+===[fn rust_guards]

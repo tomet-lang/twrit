@@ -1,0 +1,34 @@
+@kind(writ)
+
+=[ Writ: workspace root ]
+
+Rules the Twrit repository obeys.
+
+==[ crate-layering ]
+
+@rule(crate-layering){
+  guard: { twrit: layers }
+
+  layers: {
+    2: list( "app", "tests" )
+    1: list( "crates/twrit-rust" )
+    0: list( "crates/twrit" )
+  }
+}
+
+Every workspace member belongs to exactly one layer, and depends only on
+layers strictly below its own. Same-layer dependencies are allowed;
+upward ones are not.
+
+==[ rust-api-docs ]
+
+@rule(rust-api-docs){
+  guard: { twrit: rust-api }
+
+  rust_api: {
+    out: "tmtroot/generated/crates"
+  }
+}
+
+API documentation for all workspace Rust crates must be kept up to date
+with the source code and inner doc-comments (`//!`, `///`).
