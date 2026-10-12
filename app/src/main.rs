@@ -60,6 +60,7 @@ fn main() -> ExitCode {
 
 fn all_guards() -> Vec<twrit::Guard> {
     let mut guards = twrit_rust::rust_guards();
+    guards.extend(twrit_python::python_guards());
     guards.push(twrit::placement_guard());
     guards
 }
@@ -74,6 +75,15 @@ fn run(command: Command) -> anyhow::Result<ExitCode> {
                 for rule in api_rules {
                     let count = twrit_rust::api::generate(&rule, &path)?;
                     println!("Generated API documentation for {count} crate(s) (rule: {})", rule.id);
+                }
+
+                let py_api_rules = twrit::writ::twrit_rules(&writs, "python-api")?;
+                for rule in py_api_rules {
+                    let count = twrit_python::api::generate(&rule, &path)?;
+                    println!(
+                        "Generated API documentation for {count} Python module(s) (rule: {})",
+                        rule.id
+                    );
                 }
             }
 

@@ -35,10 +35,19 @@ name = "placement"
 path = "src/placement.rs"
 
 [[test]]
+name = "python_api"
+path = "src/python_api.rs"
+
+[[test]]
+name = "python_door"
+path = "src/python_door.rs"
+
+[[test]]
 name = "writ"
 path = "src/writ.rs"
 
 [dependencies]
 twrit = { workspace = true }
 twrit-rust = { workspace = true }
+twrit-python = { workspace = true }
 anyhow = { workspace = true }

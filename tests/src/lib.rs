@@ -18,6 +18,7 @@ use std::path::PathBuf;
 
 fn all_guards() -> Vec<twrit::Guard> {
     let mut guards = twrit_rust::rust_guards();
+    guards.extend(twrit_python::python_guards());
     guards.push(twrit::placement_guard());
     guards
 }

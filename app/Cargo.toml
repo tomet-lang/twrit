@@ -10,6 +10,7 @@ path = "src/main.rs"
 [dependencies]
 twrit = { workspace = true }
 twrit-rust = { workspace = true }
+twrit-python = { workspace = true }
 
 #= Crates.io
 anyhow = { workspace = true }

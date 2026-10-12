@@ -1,0 +1,77 @@
+@kind(api)
+
+@meta{crate: twrit-python, dependencies: list(twrit), dependents: list(twrit-cli, twrit-tests)}
+
+=[twrit-python]
+
+`twrit-python` -- Python workspace rules enforcement (door, python-api).
+
+==[Module api]
+
+`python-api` guard and documentation generator.
+
+Extracts Tomet API documentation (`@kind(api)`) from Python files using `rustpython-parser`,
+inspecting modules, classes, methods, functions, and their docstrings.
+
+Enforces that generated `.tmt` files in the repository match current Python sources and docstrings.
+
+===[Structs]
+
+====[struct PythonExtractOptions]
+
+Options controlling extraction of Python code documentation.
+
+====[struct PythonModuleSource]
+
+A parsed representation of a Python module.
+
+====[struct PythonApiConfig]
+
+Configuration for `python-api` read from a Rule.
+
+===[Functions]
+
+====[fn extract_module_doc]
+
+Extracts documentation for a Python module into a Tomet [`Document`].
+
+====[fn format_document]
+
+Formats a Tomet document into a formatted `.tmt` string.
+
+====[fn discover_python_modules]
+
+Discovers Python files in the repository according to configuration.
+
+====[fn generate]
+
+Generates API documentation files for all discovered Python modules.
+
+====[fn check]
+
+Guard check: ensures generated API documentation matches current Python sources.
+
+==[Module door]
+
+Python capability access control guard (`python-door`).
+
+Enforces that specific capabilities (e.g. `subprocess`, `os`, `sys`, `requests`)
+are only accessed from authorized directories/modules.
+
+===[Structs]
+
+====[struct Door]
+
+What capability is restricted, and who is allowed it.
+
+===[Functions]
+
+====[fn file_references_capability]
+
+Checks whether a Python file imports or references any of `needle_names`.
+
+====[fn check]
+
+==[Functions]
+
+===[fn python_guards]

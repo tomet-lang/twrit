@@ -1,0 +1,21 @@
+[package]
+name = "twrit-python"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+twrit = { workspace = true }
+
+#= Tomet
+tomet-ast = { workspace = true }
+tomet-formatter = { workspace = true }
+tomet-parser = { workspace = true }
+tomet-printer = { workspace = true }
+tomet-tree = { workspace = true }
+
+#= Crates.io
+anyhow = { workspace = true }
+ignore = { workspace = true }
+rustpython-ast = { workspace = true }
+rustpython-parser = { workspace = true }
+walkdir = { workspace = true }

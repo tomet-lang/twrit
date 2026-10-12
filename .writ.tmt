@@ -11,7 +11,7 @@ Rules the Twrit repository obeys.
 
   layers: {
     2: list( "app", "tests" )
-    1: list( "crates/twrit-rust" )
+    1: list( "crates/twrit-rust", "crates/twrit-python" )
     0: list( "crates/twrit" )
   }
 }

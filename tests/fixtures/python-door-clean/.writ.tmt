@@ -1,0 +1,16 @@
+@kind(writ)
+
+=[ Writ: python-door-clean fixture ]
+
+==[ subprocess-door ]
+
+@rule(subprocess-door){
+  guard: { twrit: python-door }
+
+  door: {
+    names: list("subprocess")
+    allowed: list("infra")
+  }
+}
+
+Only `infra` is allowed to use `subprocess`.

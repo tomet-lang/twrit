@@ -1,6 +1,6 @@
 @kind(api)
 
-@meta{crate: twrit-tests, dependencies: list(twrit, twrit-rust), dependents: list()}
+@meta{crate: twrit-tests, dependencies: list(twrit, twrit-python, twrit-rust), dependents: list()}
 
 =[twrit-tests]
 

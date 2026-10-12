@@ -1,8 +1,12 @@
 [workspace]
 resolver = "3"
-
-members = ["app", "crates/twrit", "crates/twrit-rust", "tests"]
-
+members = [
+  "app",
+  "crates/twrit",
+  "crates/twrit-rust",
+  "crates/twrit-python",
+  "tests"
+]
 # The fixtures under `tests/fixtures/` are real Cargo workspaces -- the
 # guards read them through `cargo metadata`, so an approximation would
 # test the approximation. Each carries its own `[workspace]`, and this
@@ -19,6 +23,7 @@ rust-version = "1.85"
 [workspace.dependencies]
 twrit = { path = "crates/twrit" }
 twrit-rust = { path = "crates/twrit-rust" }
+twrit-python = { path = "crates/twrit-python" }
 twrit-cli = { path = "app" }
 
 #= Tomet
@@ -35,6 +40,8 @@ anyhow = "1"
 cargo_metadata = "0.23"
 clap = { version = "4.6", features = ["derive"] }
 ignore = "0.4"
+rustpython-ast = "0.4"
+rustpython-parser = "0.4"
 syn = { version = "2.0", features = ["full", "visit"] }
 walkdir = "2"
 
