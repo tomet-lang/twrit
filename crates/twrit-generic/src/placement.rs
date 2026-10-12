@@ -15,8 +15,8 @@ use ignore::WalkBuilder;
 use ignore::overrides::OverrideBuilder;
 use tomet_ast::Value;
 
-use crate::writ::Rule;
-use crate::{Outcome, plural};
+use twrit_core::writ::Rule;
+use twrit_core::{Outcome, plural};
 
 /// Configuration for the placement guard.
 struct Placement {
@@ -72,7 +72,7 @@ impl Placement {
 }
 
 fn strings(key: &str, value: &Value) -> Result<Vec<String>> {
-    if let Some(items) = crate::writ::as_list(value) {
+    if let Some(items) = twrit_core::writ::as_list(value) {
         return items
             .iter()
             .map(|item| match item {
@@ -81,7 +81,7 @@ fn strings(key: &str, value: &Value) -> Result<Vec<String>> {
             })
             .collect();
     }
-    if let Some(items) = crate::writ::as_string_list(value) {
+    if let Some(items) = twrit_core::writ::as_string_list(value) {
         return Ok(items);
     }
     anyhow::bail!("`placement`'s `{key}` is not a list");

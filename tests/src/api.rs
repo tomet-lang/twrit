@@ -1,8 +1,8 @@
 use std::fs;
 
-fn all_guards() -> Vec<twrit::Guard> {
+fn all_guards() -> Vec<twrit_core::Guard> {
     let mut guards = twrit_rust::rust_guards();
-    guards.push(twrit::placement_guard());
+    guards.extend(twrit_generic::generic_guards());
     guards
 }
 
@@ -15,13 +15,13 @@ fn rust_api_guard_lifecycle() {
     let guards = all_guards();
 
     // 1. Initial check: target file does not exist yet -> should report violation
-    let report_initial = twrit::check(&fixture_dir, &guards).unwrap();
+    let report_initial = twrit_core::check(&fixture_dir, &guards).unwrap();
     assert_eq!(report_initial.violation_count(), 1);
     assert!(report_initial.render().contains("does not exist"));
 
     // 2. Generate documentation
-    let writs = twrit::writ::discover(&fixture_dir).unwrap();
-    let api_rules = twrit::writ::twrit_rules(&writs, "rust-api").unwrap();
+    let writs = twrit_core::writ::discover(&fixture_dir).unwrap();
+    let api_rules = twrit_core::writ::twrit_rules(&writs, "rust-api").unwrap();
     assert_eq!(api_rules.len(), 1);
     let count = twrit_rust::api::generate(&api_rules[0], &fixture_dir).unwrap();
     assert_eq!(count, 1);
@@ -34,12 +34,12 @@ fn rust_api_guard_lifecycle() {
     assert!(content.contains("fn greeting"));
 
     // 3. Re-check after generation -> should pass with 0 violations
-    let report_after_gen = twrit::check(&fixture_dir, &guards).unwrap();
+    let report_after_gen = twrit_core::check(&fixture_dir, &guards).unwrap();
     assert_eq!(report_after_gen.violation_count(), 0);
 
     // 4. Stale check: modify generated doc -> should report violation
     fs::write(&doc_file, "stale content").unwrap();
-    let report_stale = twrit::check(&fixture_dir, &guards).unwrap();
+    let report_stale = twrit_core::check(&fixture_dir, &guards).unwrap();
     assert_eq!(report_stale.violation_count(), 1);
     assert!(report_stale.render().contains("differs from source"));
 

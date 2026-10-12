@@ -15,8 +15,8 @@ use tomet_ast::{
     Block, Document, ElementValue, Inline, Paragraph, Placement, Section, Sigil, Span, Text, Value,
 };
 use tomet_tree::{ElementExt, element_new};
-use twrit::writ::Rule;
-use twrit::{Outcome, plural};
+use twrit_core::writ::Rule;
+use twrit_core::{Outcome, plural};
 
 /// Options controlling extraction of Python code documentation.
 #[derive(Debug, Clone, Default)]
@@ -65,7 +65,7 @@ impl PythonApiConfig {
                     }
                 }
                 "packages" => {
-                    if let Some(list) = twrit::writ::as_list(val) {
+                    if let Some(list) = twrit_core::writ::as_list(val) {
                         for item in list {
                             if let Value::String(s) = item {
                                 packages.push(s.clone());

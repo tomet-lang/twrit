@@ -19,8 +19,8 @@ use std::path::Path;
 use anyhow::{Context, Result};
 use cargo_metadata::{DependencyKind, Metadata, MetadataCommand};
 
-use twrit::writ::{Rule, string_list_map};
-use twrit::{Outcome, plural};
+use twrit_core::writ::{Rule, string_list_map};
+use twrit_core::{Outcome, plural};
 
 /// The layer a pattern list was declared under, lowest number first.
 struct Layers {

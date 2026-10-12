@@ -3,7 +3,7 @@
 pub mod api;
 pub mod door;
 
-use twrit::Guard;
+use twrit_core::Guard;
 
 pub fn python_guards() -> Vec<Guard> {
     vec![

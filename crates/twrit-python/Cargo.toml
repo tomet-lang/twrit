@@ -4,7 +4,7 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-twrit = { workspace = true }
+twrit-core = { workspace = true }
 
 #= Tomet
 tomet-ast = { workspace = true }

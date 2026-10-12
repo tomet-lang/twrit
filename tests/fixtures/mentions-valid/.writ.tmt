@@ -1,0 +1,17 @@
+@kind(writ)
+
+=[ Writ: mentions-valid fixture ]
+
+==[ valid-rules ]
+
+@rule(valid-rules){
+  guard: { twrit: mentions }
+}
+
+Check that code comment mentions correspond to declared rules.
+
+==[ existing-rule ]
+
+@rule(existing-rule){
+  guard: { none: "dummy" }
+}

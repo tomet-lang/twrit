@@ -5,7 +5,7 @@ pub mod door;
 pub mod layering;
 pub mod purity;
 
-use twrit::Guard;
+use twrit_core::Guard;
 
 pub fn rust_guards() -> Vec<Guard> {
     vec![

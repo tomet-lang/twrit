@@ -1,0 +1,16 @@
+[package]
+name = "twrit-generic"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+twrit-core = { workspace = true }
+
+#= Tomet
+tomet-ast = { workspace = true }
+tomet-extract = { workspace = true }
+
+#= Crates.io
+anyhow = { workspace = true }
+ignore = { workspace = true }
+walkdir = { workspace = true }

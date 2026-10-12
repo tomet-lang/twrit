@@ -9,8 +9,8 @@ use anyhow::{Context, Result};
 use rustpython_ast::{Mod, Stmt};
 use rustpython_parser::{Mode, parse};
 use tomet_ast::Value;
-use twrit::writ::Rule;
-use twrit::{Outcome, plural};
+use twrit_core::writ::Rule;
+use twrit_core::{Outcome, plural};
 
 /// What capability is restricted, and who is allowed it.
 pub struct Door {
@@ -68,7 +68,7 @@ impl Door {
 }
 
 fn parse_string_list(key: &str, value: &Value) -> Result<Vec<String>> {
-    let Some(items) = twrit::writ::as_list(value) else {
+    let Some(items) = twrit_core::writ::as_list(value) else {
         anyhow::bail!("`door`'s `{key}` is not a list");
     };
     items

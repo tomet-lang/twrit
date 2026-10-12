@@ -2,9 +2,10 @@
 resolver = "3"
 members = [
   "app",
-  "crates/twrit",
+  "crates/twrit-core",
   "crates/twrit-rust",
   "crates/twrit-python",
+  "crates/twrit-generic",
   "tests",
 ]
 # The fixtures under `tests/fixtures/` are real Cargo workspaces -- the
@@ -21,13 +22,15 @@ edition = "2024"
 rust-version = "1.85"
 
 [workspace.dependencies]
-twrit = { path = "crates/twrit" }
+twrit-core = { path = "crates/twrit-core" }
 twrit-rust = { path = "crates/twrit-rust" }
 twrit-python = { path = "crates/twrit-python" }
+twrit-generic = { path = "crates/twrit-generic" }
 twrit-cli = { path = "app" }
 
 #= Tomet
 tomet-ast = { git = "https://github.com/tomet-lang/tomet.git" }
+tomet-extract = { git = "https://github.com/tomet-lang/tomet.git" }
 tomet-formatter = { git = "https://github.com/tomet-lang/tomet.git" }
 tomet-load = { git = "https://github.com/tomet-lang/tomet.git" }
 tomet-parser = { git = "https://github.com/tomet-lang/tomet.git" }

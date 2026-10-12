@@ -8,9 +8,10 @@ name = "twrit"
 path = "src/main.rs"
 
 [dependencies]
-twrit = { workspace = true }
+twrit-core = { workspace = true }
 twrit-rust = { workspace = true }
 twrit-python = { workspace = true }
+twrit-generic = { workspace = true }
 
 #= Crates.io
 anyhow = { workspace = true }

@@ -16,10 +16,10 @@
 
 use std::path::PathBuf;
 
-fn all_guards() -> Vec<twrit::Guard> {
+fn all_guards() -> Vec<twrit_core::Guard> {
     let mut guards = twrit_rust::rust_guards();
     guards.extend(twrit_python::python_guards());
-    guards.push(twrit::placement_guard());
+    guards.extend(twrit_generic::generic_guards());
     guards
 }
 
@@ -33,10 +33,10 @@ pub fn check(name: &str) -> String {
 }
 
 /// The same run, when a test needs the counts rather than the text.
-pub fn report(name: &str) -> twrit::Report {
+pub fn report(name: &str) -> twrit_core::Report {
     let dir = fixture(name);
     let guards = all_guards();
-    twrit::check(&dir, &guards)
+    twrit_core::check(&dir, &guards)
         .unwrap_or_else(|e| panic!("fixture `{name}` failed to check: {e:#}"))
 }
 
@@ -59,7 +59,7 @@ pub fn fixture(name: &str) -> PathBuf {
 pub fn check_err(name: &str) -> String {
     let dir = fixture(name);
     let guards = all_guards();
-    match twrit::check(&dir, &guards) {
+    match twrit_core::check(&dir, &guards) {
         Ok(report) => panic!(
             "fixture `{name}` was expected to fail, but printed:\n{}",
             report.render()
@@ -72,7 +72,7 @@ pub fn check_err(name: &str) -> String {
 pub fn list(name: &str) -> String {
     let dir = fixture(name);
     let guards = all_guards();
-    twrit::list(&dir, &guards)
+    twrit_core::list(&dir, &guards)
         .unwrap_or_else(|e| panic!("fixture `{name}` failed to list: {e:#}"))
         .render()
 }

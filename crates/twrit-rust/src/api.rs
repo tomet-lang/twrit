@@ -17,8 +17,8 @@ use tomet_ast::{
     Block, Document, ElementValue, Inline, Paragraph, Placement, Section, Sigil, Span, Text, Value,
 };
 use tomet_tree::{ElementExt, element_new};
-use twrit::writ::Rule;
-use twrit::{Outcome, plural};
+use twrit_core::writ::Rule;
+use twrit_core::{Outcome, plural};
 
 /// Options controlling extraction of Rust code documentation.
 #[derive(Debug, Clone, Default)]

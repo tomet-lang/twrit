@@ -4,7 +4,6 @@
 //! entry naming a guard can be held to it, so the rule fails loudly rather
 //! than drifting quietly out of true.
 
-pub mod placement;
 pub mod writ;
 
 use std::path::{Path, PathBuf};
@@ -40,15 +39,6 @@ pub struct Guard {
     pub kind: &'static str,
     pub singleton: bool,
     pub check: fn(rule: &Rule, root: &Path) -> Result<Outcome>,
-}
-
-/// The built-in file placement guard.
-pub fn placement_guard() -> Guard {
-    Guard {
-        kind: "placement",
-        singleton: false,
-        check: placement::check,
-    }
 }
 
 /// Everything one `check` run has to say.

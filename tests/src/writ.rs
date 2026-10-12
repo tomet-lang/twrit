@@ -7,7 +7,7 @@ fn a_writ_is_found_despite_its_leading_dot() {
     // be invisible -- and every directory walker treats it as the latter
     // by default, which is how `tomet`'s own `check-links` came to skip
     // these files.
-    let writs = twrit::writ::discover(&twrit_tests::fixture("upward-edge"))
+    let writs = twrit_core::writ::discover(&twrit_tests::fixture("upward-edge"))
         .expect("the fixture should be readable");
     assert_eq!(writs.len(), 1);
 }
@@ -16,7 +16,7 @@ fn a_writ_is_found_despite_its_leading_dot() {
 fn every_writ_below_the_root_is_found() {
     // Not just the one at the top. Rules are scoped to a directory and
     // inherited downward, so a rule can be declared anywhere under it.
-    let writs = twrit::writ::discover(&twrit_tests::fixture("layers-twice"))
+    let writs = twrit_core::writ::discover(&twrit_tests::fixture("layers-twice"))
         .expect("the fixture should be readable");
     assert_eq!(writs.len(), 2);
 }

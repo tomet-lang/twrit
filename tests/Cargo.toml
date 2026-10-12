@@ -31,6 +31,10 @@ name = "list"
 path = "src/list.rs"
 
 [[test]]
+name = "mentions"
+path = "src/mentions.rs"
+
+[[test]]
 name = "placement"
 path = "src/placement.rs"
 
@@ -47,7 +51,8 @@ name = "writ"
 path = "src/writ.rs"
 
 [dependencies]
-twrit = { workspace = true }
+twrit-core = { workspace = true }
 twrit-rust = { workspace = true }
 twrit-python = { workspace = true }
+twrit-generic = { workspace = true }
 anyhow = { workspace = true }

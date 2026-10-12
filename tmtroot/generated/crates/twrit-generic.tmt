@@ -1,0 +1,41 @@
+@kind(api)
+
+@meta{crate: twrit-generic, dependencies: list(twrit-core), dependents: list(twrit-cli, twrit-tests)}
+
+=[twrit-generic]
+
+`twrit-generic` -- generic workspace rules (placement, mentions).
+
+==[Module mentions]
+
+The `mentions` guard.
+
+Validates that `@rule(...)` references inside source code comments
+(across Rust, Python, JavaScript, Java, Go, Shell, etc.) actually correspond
+to rules declared in the repository's `.writ.tmt` files.
+
+===[Functions]
+
+====[fn check]
+
+==[Module placement]
+
+The `placement` guard.
+
+Enforces directory layout and file placement rules. A directory tree
+declares which files are allowed to exist under it, and anything else
+is reported as stray.
+
+This replaces ad-hoc shell checks (`find ... | grep -v ...`) with a
+declarative, mechanical guard that fails loudly when an unlisted file
+appears.
+
+===[Functions]
+
+====[fn check]
+
+Runs the placement guard.
+
+==[Functions]
+
+===[fn generic_guards]

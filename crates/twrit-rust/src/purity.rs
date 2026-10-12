@@ -20,8 +20,8 @@ use anyhow::{Context, Result};
 use cargo_metadata::{DependencyKind, Metadata, MetadataCommand};
 use tomet_ast::Value;
 
-use twrit::writ::Rule;
-use twrit::{Outcome, plural};
+use twrit_core::writ::Rule;
+use twrit_core::{Outcome, plural};
 
 /// One `pure` declaration.
 struct Pure {
@@ -64,7 +64,7 @@ impl Pure {
 }
 
 fn strings(key: &str, value: &Value) -> Result<Vec<String>> {
-    if let Some(items) = twrit::writ::as_list(value) {
+    if let Some(items) = twrit_core::writ::as_list(value) {
         return items
             .iter()
             .map(|item| match item {
@@ -73,7 +73,7 @@ fn strings(key: &str, value: &Value) -> Result<Vec<String>> {
             })
             .collect();
     }
-    if let Some(items) = twrit::writ::as_string_list(value) {
+    if let Some(items) = twrit_core::writ::as_string_list(value) {
         return Ok(items);
     }
     anyhow::bail!("`pure`'s `{key}` is not a list");
