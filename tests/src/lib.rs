@@ -23,7 +23,6 @@ fn all_guards() -> Vec<twrit::Guard> {
     guards
 }
 
-
 /// Runs `check` over `tests/fixtures/<name>`, returning what the CLI
 /// would have printed.
 ///
@@ -37,7 +36,8 @@ pub fn check(name: &str) -> String {
 pub fn report(name: &str) -> twrit::Report {
     let dir = fixture(name);
     let guards = all_guards();
-    twrit::check(&dir, &guards).unwrap_or_else(|e| panic!("fixture `{name}` failed to check: {e:#}"))
+    twrit::check(&dir, &guards)
+        .unwrap_or_else(|e| panic!("fixture `{name}` failed to check: {e:#}"))
 }
 
 /// The path to one fixture workspace.

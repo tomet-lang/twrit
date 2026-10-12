@@ -74,7 +74,10 @@ fn run(command: Command) -> anyhow::Result<ExitCode> {
                 let api_rules = twrit::writ::twrit_rules(&writs, "rust-api")?;
                 for rule in api_rules {
                     let count = twrit_rust::api::generate(&rule, &path)?;
-                    println!("Generated API documentation for {count} crate(s) (rule: {})", rule.id);
+                    println!(
+                        "Generated API documentation for {count} crate(s) (rule: {})",
+                        rule.id
+                    );
                 }
 
                 let py_api_rules = twrit::writ::twrit_rules(&writs, "python-api")?;
@@ -153,7 +156,10 @@ fn run(command: Command) -> anyhow::Result<ExitCode> {
                     for f in &stale {
                         println!("Stale API documentation: {}", f.display());
                     }
-                    eprintln!("{} API documentation file(s) differ from source", stale.len());
+                    eprintln!(
+                        "{} API documentation file(s) differ from source",
+                        stale.len()
+                    );
                     ExitCode::FAILURE
                 }
             } else {

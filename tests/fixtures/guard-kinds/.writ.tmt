@@ -41,4 +41,3 @@ would have said so.
 @rule(blueprint-shape){
   guard: { none: "no cheap check for the args shape yet" }
 }
-

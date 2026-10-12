@@ -251,11 +251,7 @@ pub fn extract_module_doc(
                             continue;
                         }
                         let sig = format!("def {fn_name}{}", format_arguments(&func.args));
-                        blocks.push(Block::Section(Section::new(
-                            3,
-                            vec![text(&sig)],
-                            dummy(),
-                        )));
+                        blocks.push(Block::Section(Section::new(3, vec![text(&sig)], dummy())));
                         if let Some(doc) = extract_docstring(&func.body) {
                             blocks.extend(parse_doc_to_blocks(&doc));
                         }
@@ -268,11 +264,7 @@ pub fn extract_module_doc(
                     continue;
                 }
                 let sig = format!("def {name}{}", format_arguments(&func.args));
-                blocks.push(Block::Section(Section::new(
-                    2,
-                    vec![text(&sig)],
-                    dummy(),
-                )));
+                blocks.push(Block::Section(Section::new(2, vec![text(&sig)], dummy())));
                 if let Some(doc) = extract_docstring(&func.body) {
                     blocks.extend(parse_doc_to_blocks(&doc));
                 }
@@ -291,7 +283,10 @@ pub fn format_document(doc: &Document) -> String {
 }
 
 /// Discovers Python files in the repository according to configuration.
-pub fn discover_python_modules(root: &Path, packages: &[String]) -> Result<Vec<PythonModuleSource>> {
+pub fn discover_python_modules(
+    root: &Path,
+    packages: &[String],
+) -> Result<Vec<PythonModuleSource>> {
     let mut modules = Vec::new();
 
     let search_roots: Vec<PathBuf> = if packages.is_empty() {
@@ -436,7 +431,8 @@ class Calculator:
     def _private_method(self):
         pass
 "#;
-        let doc = extract_module_doc("sample.calc", code, &PythonExtractOptions::default()).unwrap();
+        let doc =
+            extract_module_doc("sample.calc", code, &PythonExtractOptions::default()).unwrap();
         let formatted = format_document(&doc);
 
         assert!(formatted.contains("@kind(api)"));

@@ -5,7 +5,7 @@ members = [
   "crates/twrit",
   "crates/twrit-rust",
   "crates/twrit-python",
-  "tests"
+  "tests",
 ]
 # The fixtures under `tests/fixtures/` are real Cargo workspaces -- the
 # guards read them through `cargo metadata`, so an approximation would

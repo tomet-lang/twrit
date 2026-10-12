@@ -107,7 +107,6 @@ impl Report {
             .map(|rule| {
                 let Outcome { scope, violations } = &rule.outcome;
                 if violations.is_empty() {
-
                     format!("{}: ok ({scope})", rule.id)
                 } else {
                     format!(

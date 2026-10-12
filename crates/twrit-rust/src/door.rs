@@ -24,7 +24,6 @@ use crate::purity::grep_sources;
 use twrit::writ::Rule;
 use twrit::{Outcome, plural};
 
-
 /// What the capability is in source, and who is allowed it.
 struct Door {
     /// The API names that constitute the ability, matched as substrings

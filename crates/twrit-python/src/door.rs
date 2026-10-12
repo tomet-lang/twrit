@@ -81,10 +81,7 @@ fn parse_string_list(key: &str, value: &Value) -> Result<Vec<String>> {
 }
 
 /// Checks whether a Python file imports or references any of `needle_names`.
-pub fn file_references_capability(
-    content: &str,
-    needle_names: &[String],
-) -> Vec<String> {
+pub fn file_references_capability(content: &str, needle_names: &[String]) -> Vec<String> {
     let mut hits = Vec::new();
 
     // 1. AST check for imports
@@ -180,9 +177,7 @@ pub fn check(rule: &Rule, root: &Path) -> Result<Outcome> {
 
         let hits = file_references_capability(&content, &door.names);
         for hit in hits {
-            violations.push(format!(
-                "{rel_path} is not a {hit} door, and references it"
-            ));
+            violations.push(format!("{rel_path} is not a {hit} door, and references it"));
         }
     }
 
@@ -190,9 +185,7 @@ pub fn check(rule: &Rule, root: &Path) -> Result<Outcome> {
     for allowed_dir in &door.allowed {
         let target = root.join(allowed_dir);
         if !target.exists() {
-            violations.push(format!(
-                "`door` allows {allowed_dir}, which does not exist"
-            ));
+            violations.push(format!("`door` allows {allowed_dir}, which does not exist"));
         }
     }
 
@@ -213,7 +206,12 @@ import subprocess
 import os.path
 from sys import argv
 "#;
-        let needles = vec!["subprocess".to_string(), "os".to_string(), "sys".to_string(), "requests".to_string()];
+        let needles = vec![
+            "subprocess".to_string(),
+            "os".to_string(),
+            "sys".to_string(),
+            "requests".to_string(),
+        ];
         let hits = file_references_capability(code, &needles);
         assert_eq!(hits, vec!["os", "subprocess", "sys"]);
     }

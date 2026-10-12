@@ -78,8 +78,9 @@ pub fn extract_crate_doc(
             )
         })?;
 
-    let file_ast: syn::File = syn::parse_file(root_content)
-        .map_err(|e| anyhow::anyhow!("failed to parse {}: {e}", crate_source.root_file.display()))?;
+    let file_ast: syn::File = syn::parse_file(root_content).map_err(|e| {
+        anyhow::anyhow!("failed to parse {}: {e}", crate_source.root_file.display())
+    })?;
 
     let mut blocks = Vec::new();
 
@@ -675,7 +676,10 @@ pub fn load_workspace_crates(root: &Path) -> Result<Vec<(String, RustCrateSource
         }
 
         let mut files = HashMap::new();
-        for entry in walkdir::WalkDir::new(&src_dir).into_iter().filter_map(|e| e.ok()) {
+        for entry in walkdir::WalkDir::new(&src_dir)
+            .into_iter()
+            .filter_map(|e| e.ok())
+        {
             let path = entry.path();
             if path.is_file() && path.extension().and_then(|e| e.to_str()) == Some("rs") {
                 let relative = path
@@ -693,7 +697,10 @@ pub fn load_workspace_crates(root: &Path) -> Result<Vec<(String, RustCrateSource
             crate_name: crate_name.clone(),
             root_file,
             files,
-            dependencies: dependencies_map.get(&crate_name).cloned().unwrap_or_default(),
+            dependencies: dependencies_map
+                .get(&crate_name)
+                .cloned()
+                .unwrap_or_default(),
             dependents: dependents_map.get(&crate_name).cloned().unwrap_or_default(),
         };
 

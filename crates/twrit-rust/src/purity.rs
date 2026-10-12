@@ -23,7 +23,6 @@ use tomet_ast::Value;
 use twrit::writ::Rule;
 use twrit::{Outcome, plural};
 
-
 /// One `pure` declaration.
 struct Pure {
     /// Directory paths, relative to the workspace root.

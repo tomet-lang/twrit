@@ -186,7 +186,6 @@ impl Writ {
         elements.into_iter().map(|el| self.read_rule(el)).collect()
     }
 
-
     /// Whether `el` is a `@rule`, by resolution rather than by spelling.
     ///
     /// `@rule` and `@writ.rule` are both legal in a `@kind(writ)` document
@@ -379,4 +378,3 @@ fn collect_rule_list<'a>(
         }
     }
 }
-
