@@ -3,9 +3,7 @@
   mkShell,
   fenix,
   twrit,
-  tomet,
-  tomet-lsp,
-  tomet-shelf,
+  tools,
   ...
 }:
 let
@@ -25,9 +23,7 @@ in
 mkShell rec {
   buildInputs = with pkgs; [
     twrit
-    tomet
-    tomet-lsp
-    tomet-shelf
+    tools
     deno
     just
 

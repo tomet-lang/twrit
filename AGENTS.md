@@ -64,10 +64,12 @@ directory, including `cargo metadata` on the fixture workspaces -- which is
 why eight of them carry a `[[patch.unused]]` block in their lockfile.
 Inert, and stable across runs.
 
-Neither builds the other. `tomet`'s flake takes `twrit` as a dev-shell tool
-for project management; this flake takes `tomet` as a dev-shell tool for
-formatting `.tmt` files. `flake.lock` pins both, so the mutual inputs
-resolve over commits rather than looping.
+Neither builds the other. Both take their other dev-shell tools from
+`sisho`'s flake (`tomet` for formatting `.tmt` files here, `twrit` for
+project management there), and `sisho` pins both of them. Its inputs for
+`tomet`, `twrit` and `tomet-shelf` cut the `sisho` input of each
+(`inputs.sisho.follows = ""`), so the loop is resolved over commits and
+does not unroll into the lock.
 
 At the Cargo level the direction is one way: `twrit-cli` depends on
 `tomet-load`, `tomet-parser`, `tomet-ast`, `tomet-tree` and
