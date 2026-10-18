@@ -25,7 +25,9 @@ pub fn check(path: &Path, fix: bool) -> anyhow::Result<ExitCode> {
     }
 
     let report = twrit_core::check(path, &guards)?;
-    print!("{}", report.render());
+    let mut out = std::io::stdout().lock();
+    use std::io::Write as _;
+    out.write_all(report.render().as_bytes())?;
     if report.violation_count() == 0 {
         Ok(ExitCode::SUCCESS)
     } else {

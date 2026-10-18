@@ -6,6 +6,7 @@
 
 pub mod writ;
 
+use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
 
 use anyhow::Result;
@@ -81,13 +82,13 @@ impl Report {
             return format!("no .writ.tmt found under {}\n", self.root.display());
         }
 
-        let mut out = String::new();
+        let mut out = String::with_capacity(512);
         for finding in &self.dead_guards {
-            out.push_str(&format!("{finding}\n"));
+            let _ = writeln!(out, "{finding}");
         }
         for rule in &self.rules {
             for violation in rule.outcome.violations() {
-                out.push_str(&format!("{}: {violation}\n", rule.id));
+                let _ = writeln!(out, "{}: {violation}", rule.id);
             }
         }
 
@@ -110,20 +111,18 @@ impl Report {
 
         let mut census = plural(self.rule_count, "rule");
         if self.unguarded_count > 0 {
-            census.push_str(&format!(" ({} unguarded)", self.unguarded_count));
+            let _ = write!(census, " ({} unguarded)", self.unguarded_count);
         }
         if !self.dead_guards.is_empty() {
-            census.push_str(&format!(
-                ", {}",
-                plural(self.dead_guards.len(), "dead guard")
-            ));
+            let _ = write!(census, ", {}", plural(self.dead_guards.len(), "dead guard"));
         }
 
-        out.push_str(&format!(
-            "{}, {census}, {}\n",
+        let _ = writeln!(
+            out,
+            "{}, {census}, {}",
             plural(self.writ_count, "writ"),
             summary.join(", ")
-        ));
+        );
         out
     }
 }

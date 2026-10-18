@@ -247,7 +247,7 @@ pub fn twrit_rules(writs: &[Writ], kind: &str) -> Result<Vec<Rule>> {
     let mut found = Vec::new();
     for writ in writs {
         for rule in writ.rules()? {
-            if rule.guard == Guard::Twrit(kind.to_string()) {
+            if matches!(&rule.guard, Guard::Twrit(k) if k == kind) {
                 found.push(rule);
             }
         }
@@ -268,7 +268,7 @@ pub fn as_list(value: &Value) -> Option<&[Value]> {
 /// or bracketed `Value::Blocks`.
 pub fn as_string_list(value: &Value) -> Option<Vec<String>> {
     if let Some(items) = as_list(value) {
-        let mut strings = Vec::new();
+        let mut strings = Vec::with_capacity(items.len());
         for item in items {
             if let Value::String(s) = item {
                 strings.push(s.clone());
