@@ -5,7 +5,7 @@
   twrit,
   tomet,
   tomet-lsp,
-  tmtbook,
+  tomet-shelf,
   ...
 }:
 let
@@ -27,7 +27,7 @@ mkShell rec {
     twrit
     tomet
     tomet-lsp
-    tmtbook
+    tomet-shelf
     deno
     just
 
