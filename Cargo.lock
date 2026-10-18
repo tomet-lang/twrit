@@ -1180,7 +1180,7 @@ dependencies = [
 
 [[package]]
 name = "twrit-cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -1192,7 +1192,7 @@ dependencies = [
 
 [[package]]
 name = "twrit-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "ignore",
@@ -1203,7 +1203,7 @@ dependencies = [
 
 [[package]]
 name = "twrit-generic"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "ignore",
@@ -1215,7 +1215,7 @@ dependencies = [
 
 [[package]]
 name = "twrit-python"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "ignore",
@@ -1232,7 +1232,7 @@ dependencies = [
 
 [[package]]
 name = "twrit-rust"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -1249,7 +1249,7 @@ dependencies = [
 
 [[package]]
 name = "twrit-tests"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "twrit-core",
