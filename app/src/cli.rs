@@ -3,7 +3,11 @@ use std::path::PathBuf;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
-#[command(name = "twrit", about = "Check a repository against its own writs")]
+#[command(
+    name = "twrit",
+    version,
+    about = "Check a repository against its own writs"
+)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Command,
