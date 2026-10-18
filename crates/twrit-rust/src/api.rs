@@ -11,8 +11,8 @@ use std::collections::{BTreeSet, HashMap};
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use crate::metadata::{self, Flavour};
 use anyhow::{Context, Result};
-use cargo_metadata::MetadataCommand;
 use tomet_ast::{
     Block, Document, ElementValue, Inline, Paragraph, Placement, Section, Sigil, Span, Text, Value,
 };
@@ -605,10 +605,8 @@ pub fn load_workspace_crates(root: &Path) -> Result<Vec<(String, RustCrateSource
         return Ok(Vec::new());
     }
 
-    let metadata = MetadataCommand::new()
-        .manifest_path(&cargo_toml)
-        .exec()
-        .context("failed to run cargo metadata")?;
+    let metadata =
+        metadata::get(&cargo_toml, Flavour::Deps).context("failed to run cargo metadata")?;
 
     let workspace_members: BTreeSet<_> = metadata.workspace_members.iter().collect();
 

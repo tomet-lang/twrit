@@ -17,8 +17,10 @@ use std::collections::{BTreeSet, VecDeque};
 use std::path::Path;
 
 use anyhow::{Context, Result};
-use cargo_metadata::{DependencyKind, Metadata, MetadataCommand};
+use cargo_metadata::{DependencyKind, Metadata};
 use tomet_ast::Value;
+
+use crate::metadata::{self, Flavour};
 
 use twrit_core::writ::Rule;
 use twrit_core::{Outcome, plural};
@@ -86,9 +88,7 @@ fn strings(key: &str, value: &Value) -> Result<Vec<String>> {
 /// checked everything returns, and what one that checked nothing
 /// returns, and they are not the same answer.
 pub fn check(rule: &Rule, workspace_root: &Path) -> Result<Outcome> {
-    let metadata = MetadataCommand::new()
-        .manifest_path(workspace_root.join("Cargo.toml"))
-        .exec()
+    let metadata = metadata::get(&workspace_root.join("Cargo.toml"), Flavour::Deps)
         .context("failed to read the workspace with `cargo metadata`")?;
 
     let mut violations = Vec::new();

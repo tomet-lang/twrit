@@ -3,6 +3,7 @@
 pub mod api;
 pub mod door;
 pub mod layering;
+pub mod metadata;
 pub mod purity;
 
 use twrit_core::Guard;

@@ -47,6 +47,10 @@ name = "python_door"
 path = "src/python_door.rs"
 
 [[test]]
+name = "metadata_cache"
+path = "src/metadata_cache.rs"
+
+[[test]]
 name = "writ"
 path = "src/writ.rs"
 

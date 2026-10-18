@@ -1,0 +1,5 @@
+# A fixture workspace exercising all four Rust guards
+[workspace]
+resolver = "3"
+
+members = ["core"]

@@ -111,6 +111,22 @@ Runs the guard against the workspace whose manifest is at
 violation list, which would be indistinguishable from a workspace
 whose every edge runs the right way.
 
+==[Module metadata]
+
+===[Enums]
+
+====[enum Flavour]
+
+===[Functions]
+
+====[fn get]
+
+Fetches cargo metadata for the given manifest path and flavour, using the
+cache if already queried for this manifest and flavour.
+
+An error during `cargo metadata` execution is also cached and returned on
+subsequent calls, ensuring errors are reported consistently.
+
 ==[Module purity]
 
 The `pure` guard: crates that may not reach the outside world.

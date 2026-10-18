@@ -16,8 +16,8 @@
 
 use std::path::Path;
 
+use crate::metadata::{self, Flavour};
 use anyhow::{Context, Result};
-use cargo_metadata::MetadataCommand;
 use tomet_ast::Value;
 
 use crate::purity::grep_sources;
@@ -101,10 +101,7 @@ fn strings(key: &str, value: &Value) -> Result<Vec<String>> {
 
 pub fn check(rule: &Rule, workspace_root: &Path) -> Result<Outcome> {
     let door = Door::read(rule)?;
-    let metadata = MetadataCommand::new()
-        .manifest_path(workspace_root.join("Cargo.toml"))
-        .no_deps()
-        .exec()
+    let metadata = metadata::get(&workspace_root.join("Cargo.toml"), Flavour::NoDeps)
         .context("failed to read the workspace with `cargo metadata`")?;
 
     let root = metadata.workspace_root.as_std_path();

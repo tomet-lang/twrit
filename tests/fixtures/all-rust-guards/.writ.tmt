@@ -1,0 +1,45 @@
+@kind(writ)
+
+=[ Writ: all-rust-guards fixture ]
+
+==[ crate-layering ]
+
+@rule(rule-layers){
+  guard: { twrit: layers }
+
+  layers: {
+    0: list("core")
+  }
+}
+
+==[ file-io ]
+
+@rule(rule-door){
+  guard: { twrit: door }
+
+  door: {
+    names: list("std::fs")
+    allowed: list("core")
+  }
+}
+
+==[ parser-purity ]
+
+@rule(rule-pure){
+  guard: { twrit: pure }
+
+  pure: {
+    crates: list("core")
+    forbid: list("std::process")
+    allow-external: list()
+  }
+}
+
+==[ rust-api ]
+
+@rule(rule-api){
+  guard: { twrit: rust-api }
+  rust_api: {
+    out: "docs/crates"
+  }
+}
