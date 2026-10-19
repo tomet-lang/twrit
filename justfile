@@ -17,7 +17,6 @@ test-suite:
 # `sisho` runs the `twrit` this checkout just built, not the one in the dev shell.
 docs:
     cargo build -p twrit-cli
-    ./target/debug/twrit api .
     PATH="{{ justfile_directory() }}/target/debug:$PATH" sisho fix .
 
 # Check that all documents parse, format cleanly, and match export targets.
