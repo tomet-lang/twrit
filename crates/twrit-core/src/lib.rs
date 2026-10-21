@@ -299,6 +299,7 @@ pub fn check(root: &Path, guards: &[Guard]) -> Result<Report> {
             outcome,
         });
     }
+    jobserver_gate::reclaim_implicit_token();
 
     Ok(Report {
         root: root.to_path_buf(),

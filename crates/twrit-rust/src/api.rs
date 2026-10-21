@@ -13,6 +13,7 @@ use std::path::{Path, PathBuf};
 
 use crate::metadata::{self, Flavour};
 use anyhow::{Context, Result};
+use rayon::prelude::*;
 use tomet_ast::{
     Block, Document, ElementValue, Inline, Paragraph, Placement, Section, Sigil, Span, Text, Value,
 };
@@ -606,7 +607,7 @@ pub fn load_workspace_crates(root: &Path) -> Result<Vec<(String, RustCrateSource
     }
 
     let metadata =
-        metadata::get(&cargo_toml, Flavour::Deps).context("failed to run cargo metadata")?;
+        metadata::get(&cargo_toml, Flavour::NoDeps).context("failed to run cargo metadata")?;
 
     let workspace_members: BTreeSet<_> = metadata.workspace_members.iter().collect();
 
@@ -724,37 +725,41 @@ pub fn check(rule: &Rule, root: &Path) -> Result<Outcome> {
     let options = RustExtractOptions {
         private: cfg.private,
     };
-    let mut violations = Vec::new();
 
-    for (name, crate_source) in &crates {
-        let doc = match extract_crate_doc(crate_source, &options) {
-            Ok(doc) => doc,
-            Err(e) => {
-                violations.push(format!("failed to extract API doc for crate '{name}': {e}"));
-                continue;
-            }
-        };
+    let violations: Vec<String> = crates
+        .par_iter()
+        .flat_map(|(name, crate_source)| {
+            let _token = jobserver_gate::acquire();
+            let doc = match extract_crate_doc(crate_source, &options) {
+                Ok(doc) => doc,
+                Err(e) => {
+                    return vec![format!("failed to extract API doc for crate '{name}': {e}")];
+                }
+            };
 
-        let expected_content = format_document(&doc);
-        let out_file = cfg.out_dir.join(format!("{name}.tmt"));
+            let expected_content = format_document(&doc);
+            let out_file = cfg.out_dir.join(format!("{name}.tmt"));
 
-        match fs::read_to_string(&out_file) {
-            Ok(existing) => {
-                if existing != expected_content {
-                    violations.push(format!(
-                        "API documentation for crate '{name}' ({}) differs from source; run with --fix or `twrit api`",
+            match fs::read_to_string(&out_file) {
+                Ok(existing) => {
+                    if existing != expected_content {
+                        vec![format!(
+                            "API documentation for crate '{name}' ({}) differs from source; run with --fix or `twrit api`",
+                            out_file.display()
+                        )]
+                    } else {
+                        Vec::new()
+                    }
+                }
+                Err(_) => {
+                    vec![format!(
+                        "API documentation for crate '{name}' ({}) does not exist; run with --fix or `twrit api`",
                         out_file.display()
-                    ));
+                    )]
                 }
             }
-            Err(_) => {
-                violations.push(format!(
-                    "API documentation for crate '{name}' ({}) does not exist; run with --fix or `twrit api`",
-                    out_file.display()
-                ));
-            }
-        }
-    }
+        })
+        .collect();
 
     let scope = plural(crates.len(), "crate");
 
@@ -776,16 +781,19 @@ pub fn generate_to(out_dir: &Path, private: bool, root: &Path) -> Result<usize> 
         fs::create_dir_all(out_dir)?;
     }
 
-    let mut count = 0;
-    for (name, crate_source) in &crates {
-        let doc = extract_crate_doc(crate_source, &options)?;
-        let formatted = format_document(&doc);
-        let out_file = out_dir.join(format!("{name}.tmt"));
-        fs::write(&out_file, formatted)?;
-        count += 1;
-    }
+    crates
+        .par_iter()
+        .map(|(name, crate_source)| {
+            let _token = jobserver_gate::acquire();
+            let doc = extract_crate_doc(crate_source, &options)?;
+            let formatted = format_document(&doc);
+            let out_file = out_dir.join(format!("{name}.tmt"));
+            fs::write(&out_file, formatted)?;
+            Ok(())
+        })
+        .collect::<Result<Vec<()>>>()?;
 
-    Ok(count)
+    Ok(crates.len())
 }
 
 #[cfg(test)]

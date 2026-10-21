@@ -12,3 +12,4 @@ tomet-semantics = { workspace = true }
 #= Crates.io
 anyhow = { workspace = true }
 ignore = { workspace = true }
+jobserver-gate = { workspace = true }

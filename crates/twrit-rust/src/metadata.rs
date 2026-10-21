@@ -37,11 +37,22 @@ pub fn get(manifest_path: &Path, flavour: Flavour) -> Result<Arc<Metadata>> {
     // 1. Fast path: check cache under lock
     {
         let mut lock = CACHE.lock().unwrap();
-        if let Some(entry) = lock.get_or_insert_with(HashMap::new).get(&key) {
+        let cache = lock.get_or_insert_with(HashMap::new);
+        if let Some(entry) = cache.get(&key) {
             return match entry {
                 Ok(meta) => Ok(Arc::clone(meta)),
                 Err(err_msg) => Err(anyhow::anyhow!("{err_msg}")),
             };
+        }
+        // `Deps` metadata is a strict superset of `NoDeps` (contains all packages and workspace members).
+        if flavour == Flavour::NoDeps {
+            let deps_key = (manifest_path.to_path_buf(), Flavour::Deps);
+            if let Some(entry) = cache.get(&deps_key) {
+                return match entry {
+                    Ok(meta) => Ok(Arc::clone(meta)),
+                    Err(err_msg) => Err(anyhow::anyhow!("{err_msg}")),
+                };
+            }
         }
     }
 

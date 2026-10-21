@@ -24,10 +24,7 @@ impl TempTestDir {
                 fixtures_dir.join("default.config.tmt"),
                 dir.join("default.config.tmt"),
             );
-            let _ = std::os::unix::fs::symlink(
-                fixtures_dir.join(".tomet"),
-                dir.join(".tomet"),
-            );
+            let _ = std::os::unix::fs::symlink(fixtures_dir.join(".tomet"), dir.join(".tomet"));
         }
 
         TempTestDir(dir)

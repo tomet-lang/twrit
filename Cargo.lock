@@ -427,6 +427,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
 
 [[package]]
+name = "jobserver"
+version = "0.1.35"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1c00acbd29eabad4a2392fa0e921c874934dbbf4194312ad20f04a0ed67a3cb3"
+dependencies = [
+ "getrandom 0.4.3",
+ "libc",
+]
+
+[[package]]
+name = "jobserver-gate"
+version = "0.1.0"
+source = "git+https://github.com/tomet-lang/jobserver-gate.git#9bf7703366ee404b1671e1ebbc4d0a88e6de3dd7"
+dependencies = [
+ "jobserver",
+]
+
+[[package]]
 name = "js-sys"
 version = "0.3.106"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -705,6 +723,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "getrandom 0.2.17",
+]
+
+[[package]]
+name = "rayon"
+version = "1.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fb39b166781f92d482534ef4b4b1b2568f42613b53e5b6c160e24cfbfa30926d"
+dependencies = [
+ "either",
+ "rayon-core",
+]
+
+[[package]]
+name = "rayon-core"
+version = "1.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "22e18b0f0062d30d4230b2e85ff77fdfe4326feb054b9783a3460d8435c8ab91"
+dependencies = [
+ "crossbeam-deque",
+ "crossbeam-utils",
 ]
 
 [[package]]
@@ -1224,6 +1262,7 @@ version = "0.2.0"
 dependencies = [
  "anyhow",
  "clap",
+ "jobserver-gate",
  "mimalloc",
  "twrit-core",
  "twrit-generic",
@@ -1237,6 +1276,7 @@ version = "0.2.0"
 dependencies = [
  "anyhow",
  "ignore",
+ "jobserver-gate",
  "tomet-ast",
  "tomet-load",
  "tomet-semantics",
@@ -1278,6 +1318,8 @@ dependencies = [
  "anyhow",
  "cargo_metadata",
  "ignore",
+ "jobserver-gate",
+ "rayon",
  "syn 2.0.119",
  "tomet-ast",
  "tomet-formatter",

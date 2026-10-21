@@ -28,6 +28,8 @@ twrit-python = { path = "crates/twrit-python" }
 twrit-generic = { path = "crates/twrit-generic" }
 twrit-cli = { path = "app" }
 
+jobserver-gate = { git = "https://github.com/tomet-lang/jobserver-gate.git" }
+
 #= Tomet
 tomet-ast = { git = "https://github.com/tomet-lang/tomet.git" }
 tomet-extract = { git = "https://github.com/tomet-lang/tomet.git" }
@@ -44,6 +46,7 @@ cargo_metadata = "0.23"
 clap = { version = "4.6", features = ["derive"] }
 ignore = "0.4"
 mimalloc = { version = "0.1", default-features = false }
+rayon = "1"
 rustpython-ast = "0.4"
 rustpython-parser = "0.4"
 syn = { version = "2.0", features = ["full", "visit"] }

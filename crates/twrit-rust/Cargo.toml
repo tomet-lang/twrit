@@ -17,5 +17,7 @@ tomet-tree = { workspace = true }
 anyhow = { workspace = true }
 cargo_metadata = { workspace = true }
 ignore = { workspace = true }
+jobserver-gate = { workspace = true }
+rayon = { workspace = true }
 syn = { workspace = true }
 walkdir = { workspace = true }

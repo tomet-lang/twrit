@@ -16,10 +16,11 @@
 
 use std::path::Path;
 
-use crate::metadata::{self, Flavour};
 use anyhow::{Context, Result};
+use rayon::prelude::*;
 use tomet_ast::Value;
 
+use crate::metadata::{self, Flavour};
 use crate::purity::grep_sources;
 use twrit_core::writ::Rule;
 use twrit_core::{Outcome, plural};
@@ -105,39 +106,48 @@ pub fn check(rule: &Rule, workspace_root: &Path) -> Result<Outcome> {
         .context("failed to read the workspace with `cargo metadata`")?;
 
     let root = metadata.workspace_root.as_std_path();
+    let packages: Vec<_> = metadata.workspace_packages().into_iter().collect();
+
+    let results: Vec<(Vec<String>, bool)> = packages
+        .par_iter()
+        .map(|package| {
+            let _token = jobserver_gate::acquire();
+            let Some(dir) = package
+                .manifest_path
+                .as_std_path()
+                .parent()
+                .and_then(|d| d.strip_prefix(root).ok())
+                .map(|d| d.to_string_lossy().replace('\\', "/"))
+            else {
+                return (Vec::new(), false);
+            };
+            if !door.covers(&dir) {
+                return (Vec::new(), false);
+            }
+            if door.allowed.contains(&dir) {
+                return (Vec::new(), true);
+            }
+            let mut v = Vec::new();
+            for name in &door.names {
+                if let Ok(files) = grep_sources(workspace_root, &dir, name) {
+                    for file in files {
+                        v.push(format!(
+                            "{} is not a {name} door, and names it in {file}",
+                            package.name
+                        ));
+                    }
+                }
+            }
+            (v, true)
+        })
+        .collect();
+
     let mut violations = Vec::new();
     let mut checked = 0;
-
-    for package in metadata.workspace_packages() {
-        let Some(dir) = package
-            .manifest_path
-            .as_std_path()
-            .parent()
-            .and_then(|d| d.strip_prefix(root).ok())
-            .map(|d| d.to_string_lossy().replace('\\', "/"))
-        else {
-            continue;
-        };
-        if !door.covers(&dir) {
-            continue;
-        }
-        checked += 1;
-        if door.allowed.contains(&dir) {
-            continue;
-        }
-        for name in &door.names {
-            for file in grep_sources(workspace_root, &dir, name)? {
-                // The file, because the fix is in a line rather than in a
-                // crate: either the call goes, or the writ gains a door.
-                //
-                // The allowed list is not repeated here. It is in the
-                // writ, a few lines above the reader, and printing it on
-                // every hit buried the twelve findings that mattered.
-                violations.push(format!(
-                    "{} is not a {name} door, and names it in {file}",
-                    package.name
-                ));
-            }
+    for (v, is_checked) in results {
+        violations.extend(v);
+        if is_checked {
+            checked += 1;
         }
     }
 

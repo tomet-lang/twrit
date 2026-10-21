@@ -10,6 +10,7 @@ use clap::Parser;
 use cli::{Cli, Command};
 
 fn main() -> ExitCode {
+    jobserver_gate::init_from_env();
     let cli = Cli::parse();
     match run(cli.command) {
         Ok(code) => code,

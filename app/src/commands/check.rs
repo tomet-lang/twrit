@@ -11,7 +11,10 @@ pub fn check(path: &Path, fix: bool) -> anyhow::Result<ExitCode> {
         let api_rules = twrit_core::writ::twrit_rules(&writs, "rust-api")?;
         for rule in api_rules {
             let count = twrit_rust::api::generate(&rule, path)?;
-            println!("Generated API documentation for {count} crate(s) (rule: {})", rule.id);
+            println!(
+                "Generated API documentation for {count} crate(s) (rule: {})",
+                rule.id
+            );
         }
 
         let py_api_rules = twrit_core::writ::twrit_rules(&writs, "python-api")?;
