@@ -76,7 +76,7 @@ fn cached_failure_is_reported_against_every_rule() {
     fs::write(&manifest, "invalid toml syntax [[[\n").unwrap();
     fs::write(
         fixture_dir.join(".writ.tmt"),
-        r#"@kind(writ)
+        r#"::kind(writ)
 
 =[ Writ: broken-cargo fixture ]
 

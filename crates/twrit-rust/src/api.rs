@@ -1,6 +1,6 @@
 //! `rust-api` guard and documentation generator.
 //!
-//! Extracts Tomet API documentation (`@kind(api)`) from Rust crates using `syn`,
+//! Extracts Tomet API documentation (`::kind(api)`) from Rust crates using `syn`,
 //! traverses crate and module hierarchies, inspects item visibilities (`pub`),
 //! and extracts doc-comments (`//!` and `///`).
 //!
@@ -85,8 +85,8 @@ pub fn extract_crate_doc(
 
     let mut blocks = Vec::new();
 
-    // 1. Header elements: @kind(api) and @meta{ crate: "...", dependencies: list(...), dependents: list(...) }
-    let mut kind_el = element_new(Sigil::named("kind")).with_placement(Placement::Block);
+    // 1. Header elements: ::kind(api) and ::meta{ crate: "...", dependencies: list(...), dependents: list(...) }
+    let mut kind_el = element_new(Sigil::document("kind")).with_placement(Placement::Block);
     kind_el.args = Some(Value::String("api".to_string()));
     blocks.push(Block::Element(kind_el));
 
@@ -117,7 +117,7 @@ pub fn extract_crate_doc(
         ),
     ));
 
-    let mut meta_el = element_new(Sigil::named("meta")).with_placement(Placement::Block);
+    let mut meta_el = element_new(Sigil::document("meta")).with_placement(Placement::Block);
     meta_el.value = Some(ElementValue::from_map(Value::Map(meta_pairs)));
     blocks.push(Block::Element(meta_el));
 

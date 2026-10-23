@@ -1,12 +1,12 @@
-@kind(config)
+::kind(config)
 
 /* The vault every fixture belongs to.
 
-   A fixture's `.writ.tmt` declares `@kind(writ)`, and `@rule` only
+   A fixture's `.writ.tmt` declares `::kind(writ)`, and `@rule` only
    resolves once the vocabulary that declares it is in scope. Config
    discovery walks up from the fixture, so one config here governs all of
    them rather than each carrying a copy. */
 
-@config{
+::config{
   vocabularies: list(".tomet/vocabularies/writ.vocabulary.tmt")
 }

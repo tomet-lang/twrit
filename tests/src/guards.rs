@@ -248,7 +248,7 @@ fn a_forbidden_path_in_an_internal_dependency_is_missed() {
 #[test]
 fn a_namespaced_rule_resolves_the_same() {
     // The bug this whole shape came out of. `@rule` and `@writ.rule` are
-    // two legal spellings of one element in a `@kind(writ)` document, and
+    // two legal spellings of one element in a `::kind(writ)` document, and
     // this tool used to match a bare `Sigil::Named` -- finding the first
     // and silently ignoring the second. A rule silently ignored is a rule
     // that stopped being checked.

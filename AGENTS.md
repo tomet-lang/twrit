@@ -127,7 +127,7 @@ this right now*. Putting a shell line in the entry was considered and
 rejected: it is a Makefile wearing prose, and it would mean reading a
 `.writ.tmt` could run arbitrary commands.
 
-**Names are resolved, not matched.** A writ declares `@kind(writ)`, so
+**Names are resolved, not matched.** A writ declares `::kind(writ)`, so
 `@rule` and `@writ.rule` are two legal spellings of one element and only
 `Bindings::classify` knows that. Reading goes through `tomet_load::Vault`,
 which assembles config discovery, vocabulary loading, parsing and binding

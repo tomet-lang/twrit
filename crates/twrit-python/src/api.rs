@@ -1,6 +1,6 @@
 //! `python-api` guard and documentation generator.
 //!
-//! Extracts Tomet API documentation (`@kind(api)`) from Python files using `rustpython-parser`,
+//! Extracts Tomet API documentation (`::kind(api)`) from Python files using `rustpython-parser`,
 //! inspecting modules, classes, methods, functions, and their docstrings.
 //!
 //! Enforces that generated `.tmt` files in the repository match current Python sources and docstrings.
@@ -204,13 +204,13 @@ pub fn extract_module_doc(
 
     let mut blocks = Vec::new();
 
-    // 1. Header: @kind(api) and @meta{ module: "..." }
-    let mut kind_el = element_new(Sigil::named("kind")).with_placement(Placement::Block);
+    // 1. Header: ::kind(api) and ::meta{ module: "..." }
+    let mut kind_el = element_new(Sigil::document("kind")).with_placement(Placement::Block);
     kind_el.args = Some(Value::String("api".to_string()));
     blocks.push(Block::Element(kind_el));
 
     let meta_pairs = vec![("module".to_string(), Value::String(module_name.to_string()))];
-    let mut meta_el = element_new(Sigil::named("meta")).with_placement(Placement::Block);
+    let mut meta_el = element_new(Sigil::document("meta")).with_placement(Placement::Block);
     meta_el.value = Some(ElementValue::from_map(Value::Map(meta_pairs)));
     blocks.push(Block::Element(meta_el));
 
@@ -435,7 +435,7 @@ class Calculator:
             extract_module_doc("sample.calc", code, &PythonExtractOptions::default()).unwrap();
         let formatted = format_document(&doc);
 
-        assert!(formatted.contains("@kind(api)"));
+        assert!(formatted.contains("::kind(api)"));
         assert!(formatted.contains("=[sample.calc]"));
         assert!(formatted.contains("A sample calculation module."));
         assert!(formatted.contains("==[def add(x, y=...)]"));

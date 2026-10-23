@@ -1,6 +1,6 @@
-@kind(api)
+::kind(api)
 
-@meta{crate: twrit-core, dependencies: list(), dependents: list(twrit-cli, twrit-generic, twrit-python, twrit-rust, twrit-tests)}
+::meta{crate: twrit-core, dependencies: list(), dependents: list(twrit-cli, twrit-generic, twrit-python, twrit-rust, twrit-tests)}
 
 =[twrit-core]
 
@@ -20,7 +20,7 @@ reads each entry's declaration; deciding what a given rule @em[means] is
 each guard's own job.
 
 Names are resolved through `tomet-load`, not matched by hand. A writ
-declares `@kind(writ)`, so `@rule` and `@writ.rule` are two legal
+declares `::kind(writ)`, so `@rule` and `@writ.rule` are two legal
 spellings of the same element and `Bindings::classify` maps both to
 `writ.rule`. This module used to match a bare `Sigil::Named` instead,
 which found the first spelling and silently ignored the second --

@@ -1,6 +1,6 @@
-@kind(api)
+::kind(api)
 
-@meta{crate: twrit-python, dependencies: list(twrit-core), dependents: list(twrit-cli, twrit-tests)}
+::meta{crate: twrit-python, dependencies: list(twrit-core), dependents: list(twrit-cli, twrit-tests)}
 
 =[twrit-python]
 
@@ -10,7 +10,7 @@
 
 `python-api` guard and documentation generator.
 
-Extracts Tomet API documentation (`@kind(api)`) from Python files using `rustpython-parser`,
+Extracts Tomet API documentation (`::kind(api)`) from Python files using `rustpython-parser`,
 inspecting modules, classes, methods, functions, and their docstrings.
 
 Enforces that generated `.tmt` files in the repository match current Python sources and docstrings.

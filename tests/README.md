@@ -60,7 +60,7 @@ None would have been found by generating a reference and reading it.
 
 ## The fixtures share one vault
 
-A fixture's writ declares `@kind(writ)`, and `@rule` means nothing until
+A fixture's writ declares `::kind(writ)`, and `@rule` means nothing until
 the vocabulary declaring it is in scope. Config discovery walks upward, so
 one `default.config.tmt` at `fixtures/` governs all of them rather than
 each carrying a copy -- which is also what the config file's *position*

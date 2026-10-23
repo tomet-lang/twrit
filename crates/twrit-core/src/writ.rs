@@ -6,7 +6,7 @@
 //! each guard's own job.
 //!
 //! Names are resolved through `tomet-load`, not matched by hand. A writ
-//! declares `@kind(writ)`, so `@rule` and `@writ.rule` are two legal
+//! declares `::kind(writ)`, so `@rule` and `@writ.rule` are two legal
 //! spellings of the same element and `Bindings::classify` maps both to
 //! `writ.rule`. This module used to match a bare `Sigil::Named` instead,
 //! which found the first spelling and silently ignored the second --
@@ -188,7 +188,7 @@ impl Writ {
 
     /// Whether `el` is a `@rule`, by resolution rather than by spelling.
     ///
-    /// `@rule` and `@writ.rule` are both legal in a `@kind(writ)` document
+    /// `@rule` and `@writ.rule` are both legal in a `::kind(writ)` document
     /// and mean the same thing; only `Bindings::classify` knows that.
     fn is_rule(&self, el: &Element) -> bool {
         el.sigil

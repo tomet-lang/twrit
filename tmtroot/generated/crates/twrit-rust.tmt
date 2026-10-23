@@ -1,6 +1,6 @@
-@kind(api)
+::kind(api)
 
-@meta{crate: twrit-rust, dependencies: list(twrit-core), dependents: list(twrit-cli, twrit-tests)}
+::meta{crate: twrit-rust, dependencies: list(twrit-core), dependents: list(twrit-cli, twrit-tests)}
 
 =[twrit-rust]
 
@@ -10,7 +10,7 @@
 
 `rust-api` guard and documentation generator.
 
-Extracts Tomet API documentation (`@kind(api)`) from Rust crates using `syn`,
+Extracts Tomet API documentation (`::kind(api)`) from Rust crates using `syn`,
 traverses crate and module hierarchies, inspects item visibilities (`pub`),
 and extracts doc-comments (`//!` and `///`).
 

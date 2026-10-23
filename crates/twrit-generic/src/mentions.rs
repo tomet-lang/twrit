@@ -99,7 +99,7 @@ pub fn check(rule: &Rule, root: &Path) -> Result<Outcome> {
                     if !declared_rules.contains(rule_id) {
                         violations.push(format!(
                             "{rel_path}:{}: mentions `@rule({rule_id})`, which is not declared in any writ",
-                            span.start.line
+                            line_of(&source, span.start)
                         ));
                     }
                 }
@@ -111,6 +111,11 @@ pub fn check(rule: &Rule, root: &Path) -> Result<Outcome> {
     violations.dedup();
 
     Ok(Outcome::checked(plural(checked_files, "file"), violations))
+}
+
+/// The 1-based line of byte `offset` in `source`.
+fn line_of(source: &str, offset: usize) -> usize {
+    source[..offset.min(source.len())].matches('\n').count() + 1
 }
 
 #[cfg(test)]
