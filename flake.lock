@@ -12,11 +12,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1792815503,
-        "narHash": "sha256-oqVw7N5GicEfBu7hQwko9MZY6ExJ8lygPv+QPBtZdZ0=",
+        "lastModified": 1792826888,
+        "narHash": "sha256-JOrkV/RT+YUlPAyF+jzIaGabC78mGuFmkg1XJnMMGPg=",
         "owner": "tomet-lang",
         "repo": "fs-catasto",
-        "rev": "c155de81ec3b09d9aff63231a62f65f44230e725",
+        "rev": "c7af7621fb790dd5ebe6e0c4b157d36bbb4622e7",
         "type": "github"
       },
       "original": {
@@ -774,11 +774,11 @@
         "twrit": "twrit"
       },
       "locked": {
-        "lastModified": 1792817973,
-        "narHash": "sha256-hivJcOWCRjvTTYDlOAUQUeos+fdUWDwWWcdKaWowzlE=",
+        "lastModified": 1792838058,
+        "narHash": "sha256-AKuguntErdZnLFQZQgWJTZaRE+VTpsyjS0uaGBSW1ug=",
         "owner": "tomet-lang",
         "repo": "sisho",
-        "rev": "a614e0332eac3077ede6bbf9d40d1244fd54acbd",
+        "rev": "fa6391e8cf41f5ed4195552e400ee836a62984d8",
         "type": "github"
       },
       "original": {
@@ -789,6 +789,9 @@
     },
     "sisho-desk": {
       "inputs": {
+        "catasto": [
+          "sisho"
+        ],
         "crane": "crane_4",
         "fenix": "fenix_4",
         "flake-parts": "flake-parts_4",
@@ -802,11 +805,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792812294,
-        "narHash": "sha256-hEYdX45UAFMMTI4LPtwgTwyV896N9UtfREMFrYrZVOw=",
+        "lastModified": 1792822844,
+        "narHash": "sha256-QijwWx8EnnODKWgCbREnc6viIYUlS19fho8X144BnYM=",
         "owner": "tomet-lang",
         "repo": "sisho-desk",
-        "rev": "3ff0525678106824d2023ff9ecf3a89ee467ed75",
+        "rev": "79a2025db3506be41722f5a92313ad05acfb34d7",
         "type": "github"
       },
       "original": {
@@ -827,11 +830,11 @@
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1792814531,
-        "narHash": "sha256-Z3svZKc/H3r2kBizMB36Zk/XBbtHKX1ZhEbYphdP9f0=",
+        "lastModified": 1792822638,
+        "narHash": "sha256-9d3PA9iRzoi63C7xr1zvDO30hVuf+waBs1wIl/iJ0ZE=",
         "owner": "tomet-lang",
         "repo": "tomet",
-        "rev": "d8d480fedddc70627c6b71f21dc8527d244b9edf",
+        "rev": "529802030f42727aa1f7c8a059c2537d78080821",
         "type": "github"
       },
       "original": {
@@ -1028,11 +1031,11 @@
         "treefmt-nix": "treefmt-nix_6"
       },
       "locked": {
-        "lastModified": 1792567502,
-        "narHash": "sha256-uEarlLSvc0sbWEQr4jPafwlsy3F8EwSUAGWAhK6Xy+8=",
+        "lastModified": 1792818873,
+        "narHash": "sha256-pE05OT/VHpcMB/dNDoSw02lZR/8mRuC4J/xd8qL7Kdw=",
         "owner": "tomet-lang",
         "repo": "twrit",
-        "rev": "66dba8d2c6853341d857ff4279d82d944e0de0ba",
+        "rev": "571665d5fac0599d4063dbe10a8e4e0c638bd671",
         "type": "github"
       },
       "original": {
