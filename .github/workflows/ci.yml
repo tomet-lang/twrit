@@ -8,7 +8,7 @@ on:
 
 jobs:
   ci:
-    name: Build · Test · Lint · Docs
+    name: Test · Docs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,14 +16,13 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
 
+      # Reads from Cachix only: this job builds the dev shell, which must not be pushed.
+      # The package is built and pushed by nix-ci.yml.
       - name: Setup Cachix
         uses: cachix/cachix-action@v15
         with:
           name: tomet
-          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-
-      - name: Build twrit package
-        run: nix build .#twrit
+          skipPush: true
 
       - name: Run checks & tests
         run: nix develop --command cargo test --workspace

@@ -3,17 +3,17 @@
 
 #= Linguist
 tmtroot/ linguist-documentation=true
+docs/ linguist-documentation=true
 *.md linguist-language=Markdown
 *.tmt linguist-language=Tomet
 
-# `.md` under tmtroot/spec/ and tmtroot/guide/ is exported from the sibling
-# `.tmt` source via `@config(export:)`, so it is generated, not authored.
-# Scoped by path on purpose: the `.md` under tmtroot/develop/ and
-# tmtroot/design/ is hand-written and must stay a normal, reviewable file.
-tmtroot/spec/**/*.md linguist-generated=true
-tmtroot/guide/**/*.md linguist-generated=true
+# Written by `tomet export` from the documents under tmtroot/, not by hand.
+/AGENTS.md linguist-generated=true
+/README.md linguist-generated=true
+/CONTRIBUTING.md linguist-generated=true
+/CLAUDE.md linguist-generated=true
 
-# Frozen parser/formatter test inputs, deliberately not synced with tmtroot/.
+# Frozen test inputs, deliberately not kept in step with the documents.
 tests/fixtures/ linguist-vendored=true
 
 #= Git LFS

@@ -23,6 +23,14 @@ flake-parts.lib.mkFlake { inherit inputs; } {
       packages = rec {
         default = twrit;
         twrit = pkgs.callPackage ./pkgs/twrit.nix { inherit craneLib; };
+
+        # What CI builds and sends to Cachix (.github/workflows/nix-ci.yml).
+        ci = pkgs.linkFarm "ci" [
+          {
+            name = "twrit";
+            path = twrit;
+          }
+        ];
       };
 
       devShells.default = pkgs.callPackage ./dev.nix {
