@@ -35,6 +35,8 @@ flake-parts.lib.mkFlake { inherit inputs; } {
           sisho.tomet
           sisho.tomet-lsp
           sisho.tomet-shelf
+          # `sisho check` runs `catasto check` beside `tomet` and `twrit`.
+          sisho.catasto
         ];
       };
 
