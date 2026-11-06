@@ -1,0 +1,30 @@
+::kind(config)
+::id(config-vault)
+::macros{
+  copyright: "(C) 2026 Tomet Projects"
+  generated_by: "<!-- Generated from ${1}. Edit that, then `tomet export .`. -->"
+}
+::vocabularies{
+  writ: @file(.tomet/vocabularies/writ.vocabulary.tmt)
+}
+::format{
+  meta: { always_newline: true }
+  heading: { space_inside_brackets: true }
+  table: { adjust_width: auto, max_col_width: 50 }
+  link: {
+    no_space: true
+    group_order: "[]()"
+  }
+  quote: { always_newline: true }
+  callout: {
+    style: { content: block }
+  }
+  list: {
+    multiline: {
+      style: { content: box }
+    }
+  }
+}
+::workspace{
+  unswept: list("tests/fixtures", "tests/ref", "tests/store")
+}

@@ -1,8 +1,6 @@
-::config(
-  export: {
-    type: commonmark,
-    path: "AGENTS.md"
-  }
+::export(
+  type: commonmark,
+  path: "AGENTS.md"
 )
 
 ${macro.generated_by(self.path)}
@@ -57,12 +55,9 @@ Read `CONTRIBUTING.md` for the contribution workflow, commit conventions, and ve
 
 ==[ The two repositories ]
 
-`.cargo/config.toml` carries a `[patch]` pointing the tomet git dependency
-at the sibling checkout, so a change there is visible here without a round
-trip through Forgejo. It applies to every cargo invocation under this
-directory, including `cargo metadata` on the fixture workspaces -- which is
-why eight of them carry a `[[patch.unused]]` block in their lockfile.
-Inert, and stable across runs.
+`twrit` depends on `tomet` via git dependencies pinned in `Cargo.lock`.
+Local builds and Nix development shells fetch the pinned revisions directly
+without local directory overrides or patches.
 
 Neither builds the other. Both take their other dev-shell tools from
 `sisho`'s flake (`tomet` for formatting `.tmt` files here, `twrit` for
@@ -72,14 +67,10 @@ project management there), and `sisho` pins both of them. Its inputs for
 does not unroll into the lock.
 
 At the Cargo level the direction is one way: `twrit-cli` depends on
-`tomet-load`, `tomet-parser`, `tomet-ast`, `tomet-tree` and
+`tomet-load`, `tomet-ast-parser`, `tomet-ast`, `tomet-tree` and
 `tomet-semantics` as git dependencies, because reading a `.writ.tmt` means
 parsing Tomet *and resolving* what it parsed. Nothing in `tomet` depends on
 this crate.
-
-`.cargo/config.toml` sets `net.git-fetch-with-cli`: the tomet repository is
-on a private Forgejo over SSH and cargo's built-in libgit2 fetcher cannot
-authenticate against it.
 
 ==[ Reading a writ ]
 
@@ -217,7 +208,7 @@ And the closure is the *resolved* one, from `Resolve`, not
 target-specific ones, so a wasm-only `bumpalo` joins a closure nothing
 here compiles; a crate that is never built cannot give anything an
 ability. `Resolve` also unifies features across the workspace, which is
-not an over-approximation but the answer: `cargo tree -p tomet-parser`
+not an over-approximation but the answer: `cargo tree -p twrit-core`
 shows `hashbrown` without `ahash`, `cargo tree --workspace` shows it
 with, and this repository builds with `--workspace`.
 

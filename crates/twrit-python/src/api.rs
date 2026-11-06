@@ -11,10 +11,9 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result};
 use rustpython_ast::{Arguments, Expr, ExprConstant, Mod, Stmt};
 use rustpython_parser::{Mode, parse};
-use tomet_ast::{
-    Block, Document, ElementValue, Inline, Paragraph, Placement, Section, Sigil, Span, Text, Value,
-};
-use tomet_tree::{ElementExt, element_new};
+use tomet_ast::{Block, File, Group, Inline, Paragraph, Section, Text, Value};
+use tomet_span::Span;
+use tomet_tree::declaration_new;
 use twrit_core::writ::Rule;
 use twrit_core::{Outcome, plural};
 
@@ -189,12 +188,12 @@ fn parse_doc_to_blocks(doc: &str) -> Vec<Block> {
     blocks
 }
 
-/// Extracts documentation for a Python module into a Tomet [`Document`].
+/// Extracts documentation for a Python module into a Tomet [`File`].
 pub fn extract_module_doc(
     module_name: &str,
     source: &str,
     options: &PythonExtractOptions,
-) -> Result<Document> {
+) -> Result<File> {
     let ast = parse(source, Mode::Module, module_name)
         .map_err(|e| anyhow::anyhow!("failed to parse Python source for {module_name}: {e}"))?;
 
@@ -202,17 +201,19 @@ pub fn extract_module_doc(
         anyhow::bail!("expected Module AST for {module_name}");
     };
 
-    let mut blocks = Vec::new();
+    let mut header = Vec::new();
 
     // 1. Header: ::kind(api) and ::meta{ module: "..." }
-    let mut kind_el = element_new(Sigil::document("kind")).with_placement(Placement::Block);
-    kind_el.args = Some(Value::String("api".to_string()));
-    blocks.push(Block::Element(kind_el));
+    let mut kind_decl = declaration_new("kind");
+    kind_decl.data.args = Some(Value::String("api".to_string()));
+    header.push(kind_decl);
 
     let meta_pairs = vec![("module".to_string(), Value::String(module_name.to_string()))];
-    let mut meta_el = element_new(Sigil::document("meta")).with_placement(Placement::Block);
-    meta_el.value = Some(ElementValue::from_map(Value::Map(meta_pairs)));
-    blocks.push(Block::Element(meta_el));
+    let mut meta_decl = declaration_new("meta");
+    meta_decl.data.value = Some(Group::from_map(Value::Map(meta_pairs)));
+    header.push(meta_decl);
+
+    let mut blocks = Vec::new();
 
     // 2. Module section: =[ module_name ]
     blocks.push(Block::Section(Section::new(
@@ -273,13 +274,12 @@ pub fn extract_module_doc(
         }
     }
 
-    Ok(Document::new(blocks, dummy()))
+    Ok(File::new(header, blocks, dummy()))
 }
 
 /// Formats a Tomet document into a formatted `.tmt` string.
-pub fn format_document(doc: &Document) -> String {
-    let printed = tomet_printer::document_to_tm(doc);
-    tomet_formatter::format_source(&printed)
+pub fn format_document(doc: &File) -> String {
+    tomet_printer::document_to_tm(doc)
 }
 
 /// Discovers Python files in the repository according to configuration.
@@ -442,8 +442,39 @@ class Calculator:
         assert!(formatted.contains("Adds two numbers."));
         assert!(formatted.contains("==[class Calculator]"));
         assert!(formatted.contains("A calculator class."));
-        assert!(formatted.contains("===[def __init__(self, initial=...)]"));
-        assert!(formatted.contains("===[def compute(self, op, *args)]"));
+        assert!(formatted.contains(r#"===[def \__init__(self, initial=...)]"#));
+        assert!(formatted.contains(r#"===[def compute(self, op, \*args)]"#));
         assert!(!formatted.contains("_private_method"));
+
+        // Verify that escaped headings round-trip cleanly when parsed back via parse_file
+        let parsed =
+            tomet_ast_parser::parse_file(&formatted).expect("failed to parse formatted file back");
+        fn collect_section_titles(blocks: &[Block]) -> Vec<String> {
+            let mut titles = Vec::new();
+            for b in blocks {
+                if let Block::Section(sec) = b {
+                    let title_text: String = sec
+                        .title
+                        .iter()
+                        .filter_map(|inline| match inline {
+                            Inline::Text(t) => Some(t.value.as_str()),
+                            _ => None,
+                        })
+                        .collect();
+                    titles.push(title_text);
+                    titles.extend(collect_section_titles(&sec.blocks));
+                }
+            }
+            titles
+        }
+        let titles = collect_section_titles(&parsed.body);
+        assert!(
+            titles.contains(&"def __init__(self, initial=...)".to_string()),
+            "expected unescaped __init__ title, got: {titles:?}"
+        );
+        assert!(
+            titles.contains(&"def compute(self, op, *args)".to_string()),
+            "expected unescaped compute *args title, got: {titles:?}"
+        );
     }
 }

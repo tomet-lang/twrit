@@ -1,0 +1,6 @@
+# A fixture workspace, not a member of the outer one -- see the root
+# manifest's `exclude`.
+[workspace]
+resolver = "3"
+
+members = ["base", "mid", "top"]

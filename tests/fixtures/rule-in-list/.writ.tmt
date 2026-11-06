@@ -1,0 +1,27 @@
+::kind(writ)
+
+=[ Writ: rule-in-list fixture ]
+
+Three layers and one edge that runs the wrong way, with the rule written
+as a list item in combine notation.
+
+==[ crate-layering ]
+
+Every workspace member belongs to exactly one layer, and depends only on
+layers strictly below its own.
+
+-@rule(crate-layering){
+  guard: { twrit: layers }
+
+  layers: {
+    2: list("top")
+    1: list("mid")
+    0: list("base")
+  }
+}
+
+`mid` depends on `top`, which is one layer up. That single edge is what
+this fixture exists to produce.
+
+`base` is the floor and depends on nothing, so the floor rule stays out
+of the way and only the upward edge is reported.

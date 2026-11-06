@@ -33,7 +33,7 @@ Configuration for `python-api` read from a Rule.
 
 ====[fn extract_module_doc]
 
-Extracts documentation for a Python module into a Tomet [`Document`].
+Extracts documentation for a Python module into a Tomet \[`File`\].
 
 ====[fn format_document]
 

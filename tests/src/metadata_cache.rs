@@ -21,8 +21,8 @@ impl TempTestDir {
         #[cfg(unix)]
         {
             let _ = std::os::unix::fs::symlink(
-                fixtures_dir.join("default.config.tmt"),
-                dir.join("default.config.tmt"),
+                fixtures_dir.join("vault.config.tmt"),
+                dir.join("vault.config.tmt"),
             );
             let _ = std::os::unix::fs::symlink(fixtures_dir.join(".tomet"), dir.join(".tomet"));
         }

@@ -16,7 +16,7 @@
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
-use tomet_ast::{Block, Document, Element, ElementValue, Entry, Value};
+use tomet_ast::{Block, ElementView, Entry, File, Group, Value};
 use tomet_load::Vault;
 use tomet_semantics::{Bindings, ElementKind};
 
@@ -24,7 +24,7 @@ use tomet_semantics::{Bindings, ElementKind};
 /// rule came from rather than just the rule.
 pub struct Writ {
     pub path: PathBuf,
-    pub doc: Document,
+    pub doc: File,
     bindings: Bindings,
 }
 
@@ -162,7 +162,7 @@ pub fn discover(root: &Path) -> Result<Vec<Writ>> {
 
         let path = entry.path().to_path_buf();
         // `LoadError` already names the path, so this does not prepend it.
-        let (doc, bindings) = vault.document(&path)?;
+        let (doc, bindings) = vault.file(&path)?;
 
         found.push(Writ {
             path,
@@ -181,24 +181,23 @@ pub fn discover(root: &Path) -> Result<Vec<Writ>> {
 impl Writ {
     /// Every `@rule` this writ declares, in document order.
     pub fn rules(&self) -> Result<Vec<Rule>> {
-        let mut elements = Vec::new();
-        collect_rule_elements(&self.doc.blocks, &|el| self.is_rule(el), &mut elements);
-        elements.into_iter().map(|el| self.read_rule(el)).collect()
+        let mut views = Vec::new();
+        collect_rule_elements(&self.doc.body, &|view| self.is_rule(view), &mut views);
+        views.into_iter().map(|view| self.read_rule(view)).collect()
     }
 
-    /// Whether `el` is a `@rule`, by resolution rather than by spelling.
+    /// Whether `view` is a `@rule`, by resolution rather than by spelling.
     ///
     /// `@rule` and `@writ.rule` are both legal in a `::kind(writ)` document
     /// and mean the same thing; only `Bindings::classify` knows that.
-    fn is_rule(&self, el: &Element) -> bool {
-        el.sigil
-            .name()
-            .and_then(|name| self.bindings.classify(name).ok())
-            .is_some_and(|kind| kind == ElementKind::Custom("writ.rule".into()))
+    fn is_rule(&self, view: &ElementView<'_>) -> bool {
+        self.bindings
+            .classify(view.name)
+            .is_ok_and(|kind| kind == ElementKind::Custom("writ.rule".into()))
     }
 
-    fn read_rule(&self, el: &Element) -> Result<Rule> {
-        let id = match &el.args {
+    fn read_rule(&self, view: ElementView<'_>) -> Result<Rule> {
+        let id = match &view.data.args {
             Some(Value::String(id)) => id.clone(),
             Some(other) => anyhow::bail!(
                 "{}: `@rule`'s id is not a bare name: {other:?}",
@@ -210,7 +209,7 @@ impl Writ {
             ),
         };
 
-        let Some(ElementValue::Group(group)) = &el.value else {
+        let Some(Group(group)) = &view.data.value else {
             anyhow::bail!(
                 "{}: `@rule({id})` has no `{{...}}` group, so it declares neither a guard nor \
                  parameters",
@@ -337,16 +336,17 @@ pub fn string_list_map(
 
 fn collect_rule_elements<'a>(
     blocks: &'a [Block],
-    is_rule: &impl Fn(&Element) -> bool,
-    out: &mut Vec<&'a Element>,
+    is_rule: &impl Fn(&ElementView<'a>) -> bool,
+    out: &mut Vec<ElementView<'a>>,
 ) {
     for block in blocks {
         match block {
             Block::Element(el) => {
-                if is_rule(el) {
-                    out.push(el);
+                let view = el.as_view();
+                if is_rule(&view) {
+                    out.push(view);
                 }
-                if let Some(content) = &el.content {
+                if let Some(content) = view.content {
                     collect_rule_elements(content, is_rule, out);
                 }
             }
@@ -356,23 +356,23 @@ fn collect_rule_elements<'a>(
             Block::List(list) => {
                 collect_rule_list(list, is_rule, out);
             }
-            Block::Paragraph(_) => {}
+            Block::Paragraph(_) | Block::Hole(_) | Block::Interp(_) => {}
         }
     }
 }
 
 fn collect_rule_list<'a>(
     list: &'a tomet_ast::List,
-    is_rule: &impl Fn(&Element) -> bool,
-    out: &mut Vec<&'a Element>,
+    is_rule: &impl Fn(&ElementView<'a>) -> bool,
+    out: &mut Vec<ElementView<'a>>,
 ) {
     for item in &list.items {
-        if is_rule(&item.element) {
-            out.push(&item.element);
+        if let Some(view) = item.as_element_view()
+            && is_rule(&view)
+        {
+            out.push(view);
         }
-        if let Some(content) = &item.element.content {
-            collect_rule_elements(content, is_rule, out);
-        }
+        collect_rule_elements(&item.content, is_rule, out);
         if let Some(sublist) = &item.sublist {
             collect_rule_list(sublist, is_rule, out);
         }

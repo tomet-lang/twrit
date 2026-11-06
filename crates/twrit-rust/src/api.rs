@@ -14,10 +14,9 @@ use std::path::{Path, PathBuf};
 use crate::metadata::{self, Flavour};
 use anyhow::{Context, Result};
 use rayon::prelude::*;
-use tomet_ast::{
-    Block, Document, ElementValue, Inline, Paragraph, Placement, Section, Sigil, Span, Text, Value,
-};
-use tomet_tree::{ElementExt, element_new};
+use tomet_ast::{Block, File, Group, Inline, Paragraph, Section, Text, Value};
+use tomet_span::Span;
+use tomet_tree::declaration_new;
 use twrit_core::writ::Rule;
 use twrit_core::{Outcome, plural};
 
@@ -43,12 +42,12 @@ pub struct RustCrateSource {
     pub dependents: Vec<String>,
 }
 
-/// Extracts documentation for a single Rust source code string into a Tomet [`Document`].
+/// Extracts documentation for a single Rust source code string into a Tomet [`File`].
 pub fn extract_file_doc(
     crate_name: &str,
     source: &str,
     options: &RustExtractOptions,
-) -> Result<Document> {
+) -> Result<File> {
     let mut files = HashMap::new();
     let root_file = PathBuf::from("src/lib.rs");
     files.insert(root_file.clone(), source.to_string());
@@ -64,11 +63,11 @@ pub fn extract_file_doc(
     extract_crate_doc(&crate_source, options)
 }
 
-/// Extracts documentation from an entire Rust crate into a single unified Tomet [`Document`].
+/// Extracts documentation from an entire Rust crate into a single unified Tomet [`File`].
 pub fn extract_crate_doc(
     crate_source: &RustCrateSource,
     options: &RustExtractOptions,
-) -> Result<Document> {
+) -> Result<File> {
     let root_content = crate_source
         .files
         .get(&crate_source.root_file)
@@ -83,12 +82,12 @@ pub fn extract_crate_doc(
         anyhow::anyhow!("failed to parse {}: {e}", crate_source.root_file.display())
     })?;
 
-    let mut blocks = Vec::new();
+    let mut header = Vec::new();
 
-    // 1. Header elements: ::kind(api) and ::meta{ crate: "...", dependencies: list(...), dependents: list(...) }
-    let mut kind_el = element_new(Sigil::document("kind")).with_placement(Placement::Block);
-    kind_el.args = Some(Value::String("api".to_string()));
-    blocks.push(Block::Element(kind_el));
+    // 1. Header declarations: ::kind(api) and ::meta{ crate: "...", dependencies: list(...), dependents: list(...) }
+    let mut kind_decl = declaration_new("kind");
+    kind_decl.data.args = Some(Value::String("api".to_string()));
+    header.push(kind_decl);
 
     let mut meta_pairs = vec![(
         "crate".to_string(),
@@ -117,9 +116,11 @@ pub fn extract_crate_doc(
         ),
     ));
 
-    let mut meta_el = element_new(Sigil::document("meta")).with_placement(Placement::Block);
-    meta_el.value = Some(ElementValue::from_map(Value::Map(meta_pairs)));
-    blocks.push(Block::Element(meta_el));
+    let mut meta_decl = declaration_new("meta");
+    meta_decl.data.value = Some(Group::from_map(Value::Map(meta_pairs)));
+    header.push(meta_decl);
+
+    let mut blocks = Vec::new();
 
     // 2. Root crate section: =[ crate_name ]
     blocks.push(Block::Section(Section::new(
@@ -142,7 +143,7 @@ pub fn extract_crate_doc(
 
     collector.process_items(&file_ast.items, &crate_source.root_file, 2, &mut blocks)?;
 
-    Ok(Document::new(blocks, dummy()))
+    Ok(File::new(header, blocks, dummy()))
 }
 
 struct CrateItemCollector<'a> {
@@ -469,8 +470,8 @@ fn parse_doc_to_blocks(doc_text: &str, parent_level: usize) -> Vec<Block> {
     if trimmed.is_empty() {
         return Vec::new();
     }
-    let mut blocks = match tomet_parser::parse_document(trimmed) {
-        Ok(doc) => doc.blocks,
+    let mut blocks = match tomet_ast_parser::parse_file(trimmed) {
+        Ok(doc) => doc.body,
         Err(_) => vec![Block::Paragraph(Paragraph::new(
             vec![Inline::Text(Text::new(trimmed, dummy()))],
             dummy(),
@@ -531,10 +532,9 @@ fn text(s: &str) -> Inline {
     Inline::Text(Text::new(s, dummy()))
 }
 
-/// Formats a parsed AST [`Document`] into a formatted Tomet string.
-pub fn format_document(doc: &Document) -> String {
-    let printed = tomet_printer::document_to_tm(doc);
-    tomet_formatter::format_source(&printed)
+/// Formats a parsed AST [`File`] into a formatted Tomet string.
+pub fn format_document(doc: &File) -> String {
+    tomet_printer::document_to_tm(doc)
 }
 
 // -----------------------------------------------------------------------------
@@ -820,7 +820,7 @@ pub fn calculate() -> u32 {
 fn private_helper() {}
 "#;
         let doc = extract_file_doc("my-crate", src, &RustExtractOptions::default()).unwrap();
-        assert!(!doc.blocks.is_empty());
+        assert!(!doc.body.is_empty());
 
         let printed = tomet_printer::document_to_tm(&doc);
         assert!(printed.contains("=[my-crate]"));

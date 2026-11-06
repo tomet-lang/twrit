@@ -1,4 +1,5 @@
 ::kind(config)
+::id(config-fixture-vault)
 
 /* The vault every fixture belongs to.
 
@@ -7,6 +8,6 @@
    discovery walks up from the fixture, so one config here governs all of
    them rather than each carrying a copy. */
 
-::config{
-  vocabularies: list(".tomet/vocabularies/writ.vocabulary.tmt")
+::vocabularies{
+  writ: @file(.tomet/vocabularies/writ.vocabulary.tmt)
 }

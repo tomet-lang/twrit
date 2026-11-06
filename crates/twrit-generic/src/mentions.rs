@@ -94,8 +94,8 @@ pub fn check(rule: &Rule, root: &Path) -> Result<Outcome> {
         // Extract all tomet elements in comments
         let elements = collect_comment_elements(&source, path);
         for (el, span, _) in elements {
-            if el.sigil.name().is_some_and(|n| n.name == "rule") {
-                if let Some(Value::String(rule_id)) = &el.args {
+            if el.name.is_bare_named("rule") {
+                if let Some(Value::String(rule_id)) = &el.data.args {
                     if !declared_rules.contains(rule_id) {
                         violations.push(format!(
                             "{rel_path}:{}: mentions `@rule({rule_id})`, which is not declared in any writ",
@@ -133,8 +133,8 @@ def execute():
         let elements = collect_comment_elements(code, Path::new("test.py"));
         let rule_refs: Vec<String> = elements
             .into_iter()
-            .filter(|(el, _, _)| el.sigil.name().is_some_and(|n| n.name == "rule"))
-            .filter_map(|(el, _, _)| match el.args {
+            .filter(|(el, _, _)| el.name.is_bare_named("rule"))
+            .filter_map(|(el, _, _)| match el.data.args {
                 Some(Value::String(s)) => Some(s),
                 _ => None,
             })

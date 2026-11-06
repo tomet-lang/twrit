@@ -263,6 +263,18 @@ fn a_namespaced_rule_resolves_the_same() {
 }
 
 #[test]
+fn a_rule_in_a_list_item_is_found() {
+    // In Tomet, a list item can be written in combine notation `-@rule(...)`
+    // to declare an element as a list item. Twrit must discover rules declared
+    // in this position just like top-level block elements.
+    assert_eq!(
+        twrit_tests::check("rule-in-list"),
+        "crate-layering: upward dependency: mid (layer 1, mid) -> top (layer 2, top)\n\
+         1 writ, 1 rule, crate-layering: 1 violation (3 members)\n"
+    );
+}
+
+#[test]
 fn a_rule_without_a_guard_is_refused() {
     // Not "unguarded": unwritten. Counting it as unguarded would make an
     // oversight and a decision look alike, which is the disease this

@@ -35,15 +35,15 @@ Configuration for `rust-api` read from a Rule.
 
 ====[fn extract_file_doc]
 
-Extracts documentation for a single Rust source code string into a Tomet [`Document`].
+Extracts documentation for a single Rust source code string into a Tomet \[`File`\].
 
 ====[fn extract_crate_doc]
 
-Extracts documentation from an entire Rust crate into a single unified Tomet [`Document`].
+Extracts documentation from an entire Rust crate into a single unified Tomet \[`File`\].
 
 ====[fn format_document]
 
-Formats a parsed AST [`Document`] into a formatted Tomet string.
+Formats a parsed AST \[`File`\] into a formatted Tomet string.
 
 ====[fn load_workspace_crates]
 

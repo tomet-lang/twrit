@@ -51,7 +51,7 @@ None would have been found by generating a reference and reading it.
 | Path | Contents |
 | --- | --- |
 | `fixtures/` | One directory per case: a writ, and a workspace where the rule needs one |
-| `fixtures/default.config.tmt` | The vault every fixture is in |
+| `fixtures/vault.config.tmt` | The vault every fixture is in |
 | `fixtures/.tomet/vocabularies/` | The writ vocabulary `@rule` resolves against |
 | `src/lib.rs` | Harness: locating a fixture, running `check` over it |
 | `src/guards.rs` | What each guard reports |
@@ -62,7 +62,7 @@ None would have been found by generating a reference and reading it.
 
 A fixture's writ declares `::kind(writ)`, and `@rule` means nothing until
 the vocabulary declaring it is in scope. Config discovery walks upward, so
-one `default.config.tmt` at `fixtures/` governs all of them rather than
+one `vault.config.tmt` at `fixtures/` governs all of them rather than
 each carrying a copy -- which is also what the config file's *position*
 means in Tomet: it is where the vault begins.
 
