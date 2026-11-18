@@ -46,6 +46,6 @@ mkShell rec {
   ];
 
   shellHook = ''
-    echo "🧪 Rust Twrit"
+    echo "🦀📚 Rust Tomet"
   '';
 }

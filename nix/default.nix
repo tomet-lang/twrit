@@ -17,7 +17,10 @@ flake-parts.lib.mkFlake { inherit inputs; } {
     let
       system = pkgs.stdenv.hostPlatform.system;
       craneLib = inputs.crane.mkLib pkgs;
-      sisho = inputs.sisho.packages.${system};
+      tometPkgs = inputs.tomet.packages.${system};
+      shelfPkgs = inputs.tomet-shelf.packages.${system};
+      catastoPkgs = inputs.catasto.packages.${system};
+      sishoPkgs = inputs.sisho.packages.${system};
     in
     {
       packages = rec {
@@ -38,18 +41,21 @@ flake-parts.lib.mkFlake { inherit inputs; } {
         twrit = pkgs.callPackage ./pkgs/twrit.nix { inherit craneLib; };
         fenix = inputs.fenix.packages.${system};
         # The other tools; twrit itself is the one built from this checkout.
-        tools = inputs.sisho.legacyPackages.${system}.combine [
-          sisho.sisho
-          sisho.tomet
-          sisho.tomet-lsp
-          sisho.tomet-shelf
-          # `sisho check` runs `catasto check` beside `tomet` and `twrit`.
-          sisho.catasto
-        ];
+        tools = pkgs.symlinkJoin {
+          name = "tomet-toolchain";
+          paths = [
+            sishoPkgs.sisho
+            tometPkgs.tomet
+            tometPkgs.tomet-lsp
+            shelfPkgs.tomet-shelf
+            # `sisho check` runs `catasto check` beside `tomet` and `twrit`.
+            catastoPkgs.catasto
+          ];
+        };
       };
 
       treefmt = import ./formatter.nix {
-        tomet = sisho.tomet;
+        inherit (tometPkgs) tomet;
       };
     };
 }
