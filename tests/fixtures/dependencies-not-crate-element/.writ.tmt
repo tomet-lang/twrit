@@ -1,0 +1,15 @@
+::kind(writ)
+::use(rust)
+
+=[ Writ: dependencies-not-crate-element fixture ]
+
+==[ bad-crate ]
+
+@rule(bad-crate){
+  guard: ( twrit: dependencies )
+
+  dependencies: (
+    crate: "core"
+    allow: ()
+  )
+}

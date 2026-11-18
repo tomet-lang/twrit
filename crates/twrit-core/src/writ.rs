@@ -113,6 +113,7 @@ pub struct Rule {
     /// Which writ it came from, so a violation can name the file.
     pub path: PathBuf,
     group: Vec<Entry>,
+    bindings: Bindings,
 }
 
 impl Rule {
@@ -139,6 +140,45 @@ impl Rule {
     /// All entries declared in this rule's `{...}` group.
     pub fn group(&self) -> &[Entry] {
         &self.group
+    }
+
+    /// Reads `value` as a `@rust.crate(name)` element, returning the crate name.
+    pub fn as_crate(&self, value: &Value) -> Result<String> {
+        let Value::Element(el) = value else {
+            anyhow::bail!("expected `@rust.crate(...)`, but found: {value:?}");
+        };
+        if self
+            .bindings
+            .classify(&el.name)
+            .ok()
+            .is_none_or(|kind| kind != ElementKind::Custom("rust.crate".into()))
+        {
+            anyhow::bail!(
+                "expected `@rust.crate(...)`, but `@{}` does not resolve to `rust.crate` \
+                 (declare `::use(rust)` and write `@rust.crate(...)`)",
+                el.name
+            );
+        }
+        match &el.data.args {
+            None => anyhow::bail!("`@rust.crate` carries no crate name"),
+            Some(args) if args.is_empty() => anyhow::bail!("`@rust.crate` carries no crate name"),
+            Some(args) if args.len() == 1 && args.has_no_named() => match args.nth_unnamed(0) {
+                Some(Value::Scalar(Scalar::Text(name))) => Ok(name.clone()),
+                _ => anyhow::bail!("`@rust.crate`'s argument is not a crate name: {args:?}"),
+            },
+            Some(args) => anyhow::bail!("`@rust.crate`'s argument is not a crate name: {args:?}"),
+        }
+    }
+
+    /// Reads `value` as an unnamed tuple of `@rust.crate(...)` elements.
+    pub fn as_crate_list(&self, value: &Value, what: &str, key: &str) -> Result<Vec<String>> {
+        let Value::Tuple(tuple) = value else {
+            anyhow::bail!("{what}'s `{key}` is not a list");
+        };
+        if !tuple.has_no_named() {
+            anyhow::bail!("{what}'s `{key}` is not a list");
+        }
+        tuple.values().map(|item| self.as_crate(item)).collect()
     }
 }
 
@@ -262,6 +302,7 @@ impl Writ {
                 .with_context(|| format!("{}", self.path.display()))?,
             path: self.path.clone(),
             group: group.clone(),
+            bindings: self.bindings.clone(),
         })
     }
 }

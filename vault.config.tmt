@@ -5,6 +5,7 @@
   generated_by: [@comment[ Generated from $(1). Edit that, then `tomet export .`. ]]
 )
 ::vocabulary(
+  rust: @file(.tomet/vocabularies/rust.vocabulary.tmt)
   writ: @file(.tomet/vocabularies/writ.vocabulary.tmt)
 )
 ::format(

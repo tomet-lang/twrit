@@ -18,17 +18,24 @@ use std::path::Path;
 
 use anyhow::{Context, Result};
 use cargo_metadata::{DependencyKind, Metadata};
+use tomet_ast::Value;
+use tomet_scalar::Scalar;
 
 use crate::metadata::{self, Flavour};
 
-use twrit_core::writ::{Rule, string_list_map};
+use twrit_core::writ::Rule;
 use twrit_core::{Outcome, plural};
+
+enum Pattern {
+    Dir(String),
+    Crate(String),
+}
 
 /// The layer a pattern list was declared under, lowest number first.
 struct Layers {
     /// `(layer, pattern)`, kept in declaration order so a member matching
     /// two layers can name both.
-    patterns: Vec<(u32, String)>,
+    patterns: Vec<(u32, Pattern)>,
     /// The lowest layer declared, which may depend on nothing.
     floor: u32,
 }
@@ -44,12 +51,28 @@ impl Layers {
         })?;
 
         let mut patterns = Vec::new();
-        for (key, globs) in string_list_map(declared, "`layers`")? {
+        for (key, value) in declared.keyed() {
             let layer: u32 = key
                 .parse()
                 .with_context(|| format!("`layers` key `{key}` is not a layer number"))?;
-            for glob in globs {
-                patterns.push((layer, glob));
+            let Value::Tuple(tuple) = value else {
+                anyhow::bail!("`layers`'s `{key}` is not a list");
+            };
+            if !tuple.has_no_named() {
+                anyhow::bail!("`layers`'s `{key}` is not a list");
+            }
+            for item in tuple.values() {
+                match item {
+                    Value::Scalar(Scalar::Text(glob)) => {
+                        patterns.push((layer, Pattern::Dir(glob.clone())));
+                    }
+                    Value::Element(_) => {
+                        patterns.push((layer, Pattern::Crate(rule.as_crate(item)?)));
+                    }
+                    other => {
+                        anyhow::bail!("`layers`'s `{key}` holds a non-string entry: {other:?}");
+                    }
+                }
             }
         }
 
@@ -59,20 +82,28 @@ impl Layers {
         Ok(Layers { patterns, floor })
     }
 
-    /// Every layer whose pattern list matches `dir`.
+    /// Every layer whose pattern list matches `package_name` or `dir`.
     ///
-    /// A pattern ending in `*` matches by prefix; every other pattern is
-    /// exact. Returns all matches rather than the first, so that a member
-    /// covered twice is reported as ambiguous instead of silently taking
-    /// whichever layer happened to be declared first.
-    fn matches(&self, dir: &str) -> Vec<(u32, &str)> {
+    /// A directory pattern ending in `*` matches by prefix; every other
+    /// directory pattern is exact. A `@rust.crate(...)` pattern matches by
+    /// package name. Returns all matches rather than the first, so that a
+    /// member covered twice is reported as ambiguous instead of silently
+    /// taking whichever layer happened to be declared first.
+    fn matches(&self, package_name: &str, dir: &str) -> Vec<(u32, String)> {
         self.patterns
             .iter()
-            .filter(|(_, pattern)| match pattern.strip_suffix('*') {
-                Some(prefix) => dir.starts_with(prefix),
-                None => dir == pattern,
+            .filter_map(|(layer, pattern)| match pattern {
+                Pattern::Dir(glob) => {
+                    let matched = match glob.strip_suffix('*') {
+                        Some(prefix) => dir.starts_with(prefix),
+                        None => dir == glob,
+                    };
+                    matched.then(|| (*layer, glob.clone()))
+                }
+                Pattern::Crate(name) => {
+                    (package_name == name).then(|| (*layer, format!("@rust.crate({name})")))
+                }
             })
-            .map(|(layer, pattern)| (*layer, pattern.as_str()))
             .collect()
     }
 }
@@ -166,7 +197,7 @@ fn assign<'a>(
         // is one per workspace member and the process is short-lived.
         let dir: &'a str = Box::leak(dir.into_boxed_str());
 
-        match layers.matches(dir).as_slice() {
+        match layers.matches(package.name.as_str(), dir).as_slice() {
             [] => violations.push(format!(
                 "unclassified member: {dir} matches no layer in `layers`"
             )),

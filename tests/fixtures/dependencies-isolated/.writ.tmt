@@ -1,0 +1,15 @@
+::kind(writ)
+::use(rust)
+
+=[ Writ: dependencies-isolated fixture ]
+
+==[ isolated-core ]
+
+@rule(isolated-core){
+  guard: ( twrit: dependencies )
+
+  dependencies: (
+    crate: @rust.crate(core)
+    allow: ()
+  )
+}

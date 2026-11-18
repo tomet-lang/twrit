@@ -1,0 +1,15 @@
+::kind(writ)
+::use(rust)
+
+=[ Writ: dependencies-dead-entry fixture ]
+
+==[ core-deps ]
+
+@rule(core-deps){
+  guard: ( twrit: dependencies )
+
+  dependencies: (
+    crate: @rust.crate(core)
+    allow: ( @rust.crate(helper) )
+  )
+}

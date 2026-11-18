@@ -1,0 +1,15 @@
+::kind(writ)
+::use(rust)
+
+=[ Writ: dependencies-undeclared fixture ]
+
+==[ core-deps ]
+
+@rule(core-deps){
+  guard: ( twrit: dependencies )
+
+  dependencies: (
+    crate: @rust.crate(core)
+    allow: ()
+  )
+}

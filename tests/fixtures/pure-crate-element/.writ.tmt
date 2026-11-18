@@ -1,0 +1,16 @@
+::kind(writ)
+::use(rust)
+
+=[ Writ: pure-crate-element fixture ]
+
+==[ parser-purity ]
+
+@rule(parser-purity){
+  guard: ( twrit: pure )
+
+  pure: (
+    crates: ( @rust.crate(core) )
+    forbid: ( "std::fs" )
+    allow-external: ()
+  )
+}

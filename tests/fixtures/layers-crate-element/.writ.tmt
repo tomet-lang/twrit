@@ -1,0 +1,15 @@
+::kind(writ)
+::use(rust)
+
+=[ Writ: layers-crate-element fixture ]
+
+==[ crate-layering ]
+
+@rule(crate-layering){
+  guard: ( twrit: layers )
+
+  layers: (
+    1: ( @rust.crate(top-pkg) )
+    0: ( @rust.crate(base-pkg) )
+  )
+}

@@ -4,7 +4,7 @@
 
 =[twrit-rust]
 
-`twrit-rust` -- Rust workspace rules enforcement (layering, door, purity).
+`twrit-rust` -- Rust workspace rules enforcement (layering, dependencies, door, purity).
 
 ==[Module api]
 
@@ -60,6 +60,24 @@ Generates and writes `.tmt` files for all crates, returning the count of written
 ====[fn generate_to]
 
 Generates and writes `.tmt` files to `out_dir`.
+
+==[Module dependencies]
+
+The `dependencies` guard: exact workspace dependency allowlisting per crate.
+
+Declares the target `@rust.crate(...)` and the exact set of workspace
+members it is allowed to depend on. Checked in both directions:
+
+1. Any normal dependency on a workspace member not listed in `allow` is a
+violation.
+2. Any entry in `allow` that the crate does not actually depend on is a
+violation, so the allowlist stays a true statement about the code.
+
+===[Functions]
+
+====[fn check]
+
+Runs the `dependencies` guard against `workspace_root/Cargo.toml`.
 
 ==[Module door]
 

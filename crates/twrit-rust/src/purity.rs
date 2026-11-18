@@ -18,16 +18,24 @@ use std::path::Path;
 
 use anyhow::{Context, Result};
 use cargo_metadata::{DependencyKind, Metadata};
+use tomet_ast::Value;
+use tomet_scalar::Scalar;
 
 use crate::metadata::{self, Flavour};
 
 use twrit_core::writ::{Rule, string_list};
 use twrit_core::{Outcome, plural};
 
+enum TargetCrate {
+    /// Directory path, relative to the workspace root.
+    Dir(String),
+    /// Package name, from `@rust.crate(name)`.
+    Name(String),
+}
+
 /// One `pure` declaration.
 struct Pure {
-    /// Directory paths, relative to the workspace root.
-    crates: Vec<String>,
+    crates: Vec<TargetCrate>,
     allow_external: Vec<String>,
     forbid: Vec<String>,
 }
@@ -48,7 +56,7 @@ impl Pure {
 
         for (key, value) in entries.keyed() {
             match key.as_ref() {
-                "crates" => crates = string_list(value, "`pure`", &key)?,
+                "crates" => crates = read_target_crates(rule, value)?,
                 "forbid" => forbid = string_list(value, "`pure`", &key)?,
                 "allow-external" => allow_external = string_list(value, "`pure`", &key)?,
                 other => anyhow::bail!("`pure` does not know the key `{other}`"),
@@ -62,6 +70,23 @@ impl Pure {
             forbid,
         })
     }
+}
+
+fn read_target_crates(rule: &Rule, value: &Value) -> Result<Vec<TargetCrate>> {
+    let Value::Tuple(tuple) = value else {
+        anyhow::bail!("`pure`'s `crates` is not a list");
+    };
+    if !tuple.has_no_named() {
+        anyhow::bail!("`pure`'s `crates` is not a list");
+    }
+    tuple
+        .values()
+        .map(|item| match item {
+            Value::Scalar(Scalar::Text(dir)) => Ok(TargetCrate::Dir(dir.clone())),
+            Value::Element(_) => Ok(TargetCrate::Name(rule.as_crate(item)?)),
+            other => anyhow::bail!("`pure`'s `crates` holds an invalid entry: {other:?}"),
+        })
+        .collect()
 }
 
 /// Runs every `pure` declared across `writs`.
@@ -78,8 +103,8 @@ pub fn check(rule: &Rule, workspace_root: &Path) -> Result<Outcome> {
     let mut checked = 0;
     {
         let pure = Pure::read(rule)?;
-        for dir in &pure.crates {
-            check_one(&metadata, workspace_root, dir, &pure, &mut violations)?;
+        for target in &pure.crates {
+            check_one(&metadata, workspace_root, target, &pure, &mut violations)?;
             checked += 1;
         }
     }
@@ -92,22 +117,43 @@ pub fn check(rule: &Rule, workspace_root: &Path) -> Result<Outcome> {
 fn check_one(
     metadata: &Metadata,
     workspace_root: &Path,
-    dir: &str,
+    target: &TargetCrate,
     pure: &Pure,
     violations: &mut Vec<String>,
 ) -> Result<()> {
     let mut reached: std::collections::BTreeSet<String> = BTreeSet::new();
     let root = metadata.workspace_root.as_std_path();
-    let package = metadata.workspace_packages().into_iter().find(|p| {
-        p.manifest_path
-            .as_std_path()
-            .parent()
-            .and_then(|d| d.strip_prefix(root).ok())
-            .is_some_and(|d| d.to_string_lossy().replace('\\', "/") == dir)
-    });
+    let (package, label, dir) = match target {
+        TargetCrate::Dir(dir) => {
+            let pkg = metadata.workspace_packages().into_iter().find(|p| {
+                p.manifest_path
+                    .as_std_path()
+                    .parent()
+                    .and_then(|d| d.strip_prefix(root).ok())
+                    .is_some_and(|d| d.to_string_lossy().replace('\\', "/") == *dir)
+            });
+            (pkg, dir.as_str(), dir.clone())
+        }
+        TargetCrate::Name(name) => {
+            let pkg = metadata
+                .workspace_packages()
+                .into_iter()
+                .find(|p| p.name.as_str() == *name);
+            let dir = pkg
+                .and_then(|p| {
+                    p.manifest_path
+                        .as_std_path()
+                        .parent()
+                        .and_then(|d| d.strip_prefix(root).ok())
+                        .map(|d| d.to_string_lossy().replace('\\', "/"))
+                })
+                .unwrap_or_default();
+            (pkg, name.as_str(), dir)
+        }
+    };
     let Some(package) = package else {
         violations.push(format!(
-            "`pure` names {dir}, which is not a workspace member"
+            "`pure` names {label}, which is not a workspace member"
         ));
         return Ok(());
     };
@@ -181,7 +227,7 @@ fn check_one(
                     reached.insert(dep_name);
                 } else {
                     violations.push(format!(
-                        "{dir} reaches an external crate not in `allow-external`: {from} -> {dep_name}"
+                        "{label} reaches an external crate not in `allow-external`: {from} -> {dep_name}"
                     ));
                 }
             }
@@ -195,14 +241,14 @@ fn check_one(
     for entry in &pure.allow_external {
         if !reached.contains(entry.as_str()) {
             violations.push(format!(
-                "`allow-external` lists {entry}, which nothing under {dir} reaches"
+                "`allow-external` lists {entry}, which nothing under {label} reaches"
             ));
         }
     }
 
     for path in &pure.forbid {
-        for hit in grep_sources(workspace_root, dir, path)? {
-            violations.push(format!("{dir} names a forbidden path: {path} in {hit}"));
+        for hit in grep_sources(workspace_root, &dir, path)? {
+            violations.push(format!("{label} names a forbidden path: {path} in {hit}"));
         }
     }
 

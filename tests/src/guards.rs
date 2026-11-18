@@ -333,7 +333,7 @@ fn a_twrit_kind_this_tool_does_not_have_is_refused() {
         twrit_tests::check_err("rule-unknown-kind"),
         format!(
             "{}: `@rule(import-cycles)` names `twrit: cycles`, which this tool does not \
-              implement; it implements layers, pure, door, rust-api, python-door, python-api, placement, mentions",
+              implement; it implements layers, dependencies, pure, door, rust-api, python-door, python-api, placement, mentions",
             twrit_tests::fixture("rule-unknown-kind")
                 .join(".writ.tmt")
                 .display()
@@ -375,5 +375,58 @@ fn an_allow_external_entry_nothing_reaches_is_reported() {
         twrit_tests::check("pure-unused-allow"),
         "parser-purity: `allow-external` lists gone, which nothing under core reaches\n\
          1 writ, 1 rule, parser-purity: 1 violation (1 crate)\n"
+    );
+}
+
+// -- dependencies and @rust.crate --------------------------------------
+
+#[test]
+fn an_isolated_crate_passes_dependencies_check() {
+    assert_eq!(
+        twrit_tests::check("dependencies-isolated"),
+        "1 writ, 1 rule, isolated-core: ok (1 crate)\n"
+    );
+}
+
+#[test]
+fn an_undeclared_workspace_dependency_is_reported() {
+    assert_eq!(
+        twrit_tests::check("dependencies-undeclared"),
+        "core-deps: `core` depends on workspace member `helper`, but it is not listed in `allow`\n\
+         1 writ, 1 rule, core-deps: 1 violation (1 crate)\n"
+    );
+}
+
+#[test]
+fn a_dead_allow_entry_in_dependencies_is_reported() {
+    assert_eq!(
+        twrit_tests::check("dependencies-dead-entry"),
+        "core-deps: `core` allows dependency on `helper`, but does not depend on it\n\
+         1 writ, 1 rule, core-deps: 1 violation (1 crate)\n"
+    );
+}
+
+#[test]
+fn a_non_crate_element_in_dependencies_is_refused() {
+    let msg = twrit_tests::check_err("dependencies-not-crate-element");
+    assert!(
+        msg.starts_with("expected `@rust.crate(...)`, but found: "),
+        "unexpected message: {msg}"
+    );
+}
+
+#[test]
+fn a_pure_crate_named_by_crate_element_passes() {
+    assert_eq!(
+        twrit_tests::check("pure-crate-element"),
+        "1 writ, 1 rule, parser-purity: ok (1 crate)\n"
+    );
+}
+
+#[test]
+fn a_layer_named_by_crate_element_passes() {
+    assert_eq!(
+        twrit_tests::check("layers-crate-element"),
+        "1 writ, 1 rule, crate-layering: ok (2 members)\n"
     );
 }

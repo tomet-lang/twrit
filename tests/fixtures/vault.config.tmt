@@ -9,5 +9,6 @@
    them rather than each carrying a copy. */
 
 ::vocabulary(
+  rust: @file(.tomet/vocabularies/rust.vocabulary.tmt)
   writ: @file(.tomet/vocabularies/writ.vocabulary.tmt)
 )
