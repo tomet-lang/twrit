@@ -9,13 +9,13 @@ Dev-dependencies are exempt. A crate may reach upward in
 that says nothing about how the shipped code is arranged.
 
 @rule(crate-layering){
-  guard: { twrit: layers }
+  guard: ( twrit: layers )
 
-  layers: {
-    2: list("top")
-    1: list("mid")
-    0: list("base")
-  }
+  layers: (
+    2: ("top")
+    1: ("mid")
+    0: ("base")
+  )
 }
 
 This is `upward-edge` with the one edge moved to `[dev-dependencies]`.

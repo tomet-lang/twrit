@@ -46,7 +46,7 @@ fn a_parse_error_names_the_file_and_the_position() {
     assert_eq!(
         twrit_tests::check_err("unparseable"),
         format!(
-            "failed to parse {}/.writ.tmt: 19:1: expected '}}'",
+            "failed to parse {}/.writ.tmt: 14:22: unterminated '{{', expected '}}'",
             dir.display()
         )
     );

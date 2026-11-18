@@ -5,7 +5,7 @@
 ==[ import-cycles ]
 
 @rule(import-cycles){
-  guard: { twrit: cycles }
+  guard: ( twrit: cycles )
 }
 
 The writ says this tool holds the rule. It does not -- there is no

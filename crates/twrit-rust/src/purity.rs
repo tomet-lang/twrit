@@ -18,11 +18,10 @@ use std::path::Path;
 
 use anyhow::{Context, Result};
 use cargo_metadata::{DependencyKind, Metadata};
-use tomet_ast::Value;
 
 use crate::metadata::{self, Flavour};
 
-use twrit_core::writ::Rule;
+use twrit_core::writ::{Rule, string_list};
 use twrit_core::{Outcome, plural};
 
 /// One `pure` declaration.
@@ -47,11 +46,11 @@ impl Pure {
         let mut allow_external = Vec::new();
         let mut forbid = Vec::new();
 
-        for (key, value) in entries {
-            match key.as_str() {
-                "crates" => crates = strings(key, value)?,
-                "forbid" => forbid = strings(key, value)?,
-                "allow-external" => allow_external = strings(key, value)?,
+        for (key, value) in entries.keyed() {
+            match key.as_ref() {
+                "crates" => crates = string_list(value, "`pure`", &key)?,
+                "forbid" => forbid = string_list(value, "`pure`", &key)?,
+                "allow-external" => allow_external = string_list(value, "`pure`", &key)?,
                 other => anyhow::bail!("`pure` does not know the key `{other}`"),
             }
         }
@@ -63,22 +62,6 @@ impl Pure {
             forbid,
         })
     }
-}
-
-fn strings(key: &str, value: &Value) -> Result<Vec<String>> {
-    if let Some(items) = twrit_core::writ::as_list(value) {
-        return items
-            .iter()
-            .map(|item| match item {
-                Value::String(s) => Ok(s.clone()),
-                other => anyhow::bail!("`pure`'s `{key}` holds a non-string entry: {other:?}"),
-            })
-            .collect();
-    }
-    if let Some(items) = twrit_core::writ::as_string_list(value) {
-        return Ok(items);
-    }
-    anyhow::bail!("`pure`'s `{key}` is not a list");
 }
 
 /// Runs every `pure` declared across `writs`.

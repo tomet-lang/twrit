@@ -5,13 +5,13 @@
 ==[ parser-purity ]
 
 @rule(parser-purity){
-  guard: { twrit: pure }
+  guard: ( twrit: pure )
 
-  pure: {
-    crates: list("core")
-    forbid: list()
-    allow-external: list("outside", "gone")
-  }
+  pure: (
+    crates: ("core")
+    forbid: ()
+    allow-external: ("outside", "gone")
+  )
 }
 
 `core` reaches `outside`, which is listed. `gone` is listed and reached by

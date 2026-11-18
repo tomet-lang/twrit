@@ -282,7 +282,7 @@ fn a_rule_without_a_guard_is_refused() {
     assert_eq!(
         twrit_tests::check_err("rule-no-guard"),
         format!(
-            "{}: `@rule(crate-layering)` declares no `guard`; write `guard: {{ none: \"...\" }}` \
+            "{}: `@rule(crate-layering)` declares no `guard`; write `guard: ( none: \"...\" )` \
              when nothing holds it yet",
             twrit_tests::fixture("rule-no-guard")
                 .join(".writ.tmt")

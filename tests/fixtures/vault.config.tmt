@@ -8,6 +8,6 @@
    discovery walks up from the fixture, so one config here governs all of
    them rather than each carrying a copy. */
 
-::vocabularies{
+::vocabulary(
   writ: @file(.tomet/vocabularies/writ.vocabulary.tmt)
-}
+)

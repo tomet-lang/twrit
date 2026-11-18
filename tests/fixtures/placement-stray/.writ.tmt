@@ -3,13 +3,13 @@
 ==[ placement-stray ]
 
 @rule(placement-stray){
-  guard: { twrit: placement }
+  guard: ( twrit: placement )
 
-  placement: {
+  placement: (
     within: "docs"
-    allow: list(
+    allow: (
       "spec/**/*.tmt",
       "README.tmt"
 )
-  }
+  )
 }

@@ -7,12 +7,12 @@
 Every workspace member belongs to exactly *one* layer.
 
 @rule(crate-layering){
-  guard: { twrit: layers }
+  guard: ( twrit: layers )
 
-  layers: {
-    1: list("thing*")
-    0: list("thing")
-  }
+  layers: (
+    1: ("thing*")
+    0: ("thing")
+  )
 }
 
 `thing` matches both patterns. Taking whichever was declared first would

@@ -5,7 +5,7 @@
 ==[ blueprint-shape ]
 
 @rule(blueprint-shape){
-  guard: { none: "" }
+  guard: ( none: "" )
 }
 
 `none` with nothing in it. Saying nobody holds a rule is allowed; saying

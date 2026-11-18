@@ -5,13 +5,13 @@
 ==[ parser-purity ]
 
 @rule(parser-purity){
-  guard: { twrit: pure }
+  guard: ( twrit: pure )
 
-  pure: {
-    crates: list("core")
-    forbid: list("std::fs")
-    allow-external: list()
-  }
+  pure: (
+    crates: ("core")
+    forbid: ("std::fs")
+    allow-external: ()
+  )
 }
 
 `inner` is a workspace member, so the allowlist half walks through it

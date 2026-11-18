@@ -16,8 +16,9 @@
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
-use tomet_ast::{Block, ElementView, Entry, File, Group, Value};
+use tomet_ast::{Block, ElementView, Entry, File, Group, Tuple, Value};
 use tomet_load::Vault;
+use tomet_scalar::Scalar;
 use tomet_semantics::{Bindings, ElementKind};
 
 /// One parsed writ, kept with its path so a violation can name the file the
@@ -70,18 +71,25 @@ impl Guard {
         }
     }
 
-    fn from_map(entries: &[(String, Value)], id: &str) -> Result<Self> {
-        let [(key, value)] = entries else {
+    fn from_tuple(tuple: &Tuple, id: &str) -> Result<Self> {
+        if tuple.len() != 1 {
             anyhow::bail!(
                 "`@rule({id})`'s `guard` holds {} entries; it names exactly one holder",
-                entries.len()
+                tuple.len()
+            );
+        }
+        let entry = tuple.nth(0).expect("checked len == 1");
+        let Some(key) = entry.name() else {
+            anyhow::bail!(
+                "`@rule({id})`'s `guard` holds an unnamed entry; it names one holder as `key: value`"
             );
         };
-        let text = match value {
-            Value::String(s) => s.clone(),
+        let text = match entry.value() {
+            Value::Scalar(Scalar::Text(s)) => s.clone(),
+            Value::Scalar(Scalar::None) if key == "none" => String::new(),
             other => anyhow::bail!("`@rule({id})`'s `guard: {key}` is not a string: {other:?}"),
         };
-        match key.as_str() {
+        match key {
             "twrit" => Ok(Guard::Twrit(text)),
             "runs" => Ok(Guard::Runs(text)),
             "test" => Ok(Guard::Test(text)),
@@ -108,14 +116,14 @@ pub struct Rule {
 }
 
 impl Rule {
-    /// A nested `key: { ... }` from this rule's own group.
+    /// A nested `key: ( ... )` tuple from this rule's own group.
     ///
     /// The parameters live inside the entry rather than beside it, which
     /// is what makes a dropped blank line a parse error instead of a
     /// declaration nobody owns.
-    pub fn map(&self, key: &str) -> Option<&[(String, Value)]> {
+    pub fn map(&self, key: &str) -> Option<&Tuple> {
         self.group.iter().find_map(|entry| match entry {
-            Entry::Pair(k, Value::Map(entries)) if k == key => Some(entries.as_slice()),
+            Entry::Pair(k, Value::Tuple(tuple)) if k == key => Some(tuple),
             _ => None,
         })
     }
@@ -198,13 +206,23 @@ impl Writ {
 
     fn read_rule(&self, view: ElementView<'_>) -> Result<Rule> {
         let id = match &view.data.args {
-            Some(Value::String(id)) => id.clone(),
-            Some(other) => anyhow::bail!(
-                "{}: `@rule`'s id is not a bare name: {other:?}",
-                self.path.display()
-            ),
             None => anyhow::bail!(
                 "{}: a `@rule` carries no id; the heading is prose and cannot serve as one",
+                self.path.display()
+            ),
+            Some(args) if args.is_empty() => anyhow::bail!(
+                "{}: a `@rule` carries no id; the heading is prose and cannot serve as one",
+                self.path.display()
+            ),
+            Some(args) if args.len() == 1 && args.has_no_named() => match args.nth_unnamed(0) {
+                Some(Value::Scalar(Scalar::Text(id))) => id.clone(),
+                _ => anyhow::bail!(
+                    "{}: `@rule`'s id is not a bare name: {args:?}",
+                    self.path.display()
+                ),
+            },
+            Some(other) => anyhow::bail!(
+                "{}: `@rule`'s id is not a bare name: {other:?}",
                 self.path.display()
             ),
         };
@@ -217,23 +235,30 @@ impl Writ {
             );
         };
 
-        let guard = group
+        let guard_val = group
             .iter()
             .find_map(|entry| match entry {
-                Entry::Pair(k, Value::Map(entries)) if k == "guard" => Some(entries.as_slice()),
+                Entry::Pair(k, v) if k == "guard" => Some(v),
                 _ => None,
             })
             .with_context(|| {
                 format!(
                     "{}: `@rule({id})` declares no `guard`; \
-                     write `guard: {{ none: \"...\" }}` when nothing holds it yet",
+                     write `guard: ( none: \"...\" )` when nothing holds it yet",
                     self.path.display()
                 )
             })?;
 
+        let Value::Tuple(guard) = guard_val else {
+            anyhow::bail!(
+                "{}: `@rule({id})`'s `guard` is not a `( holder: value )` tuple: {guard_val:?}",
+                self.path.display()
+            );
+        };
+
         Ok(Rule {
             id: id.clone(),
-            guard: Guard::from_map(guard, &id)
+            guard: Guard::from_tuple(guard, &id)
                 .with_context(|| format!("{}", self.path.display()))?,
             path: self.path.clone(),
             group: group.clone(),
@@ -254,82 +279,37 @@ pub fn twrit_rules(writs: &[Writ], kind: &str) -> Result<Vec<Rule>> {
     Ok(found)
 }
 
-/// Returns the slice of elements if `value` is either a sequence or a `list(...)` call.
-pub fn as_list(value: &Value) -> Option<&[Value]> {
-    match value {
-        Value::Seq(items) => Some(items.as_slice()),
-        Value::Call(name, args) if name == "list" => Some(args.as_slice()),
-        _ => None,
+/// Reads `value` as an unnamed tuple of strings: `( "a", "b", ... )`.
+///
+/// Returns an error when `value` is not an unnamed tuple or when any entry is
+/// not a text scalar.
+pub fn string_list(value: &Value, what: &str, key: &str) -> Result<Vec<String>> {
+    let Value::Tuple(tuple) = value else {
+        anyhow::bail!("{what}'s `{key}` is not a list");
+    };
+    if !tuple.has_no_named() {
+        anyhow::bail!("{what}'s `{key}` is not a list");
     }
+    tuple
+        .values()
+        .map(|item| match item {
+            Value::Scalar(Scalar::Text(s)) => Ok(s.clone()),
+            other => anyhow::bail!("{what}'s `{key}` holds a non-string entry: {other:?}"),
+        })
+        .collect()
 }
 
-/// Extracts a list of strings from either a `Value::Seq`, a `list(...)` call,
-/// or bracketed `Value::Blocks`.
-pub fn as_string_list(value: &Value) -> Option<Vec<String>> {
-    if let Some(items) = as_list(value) {
-        let mut strings = Vec::with_capacity(items.len());
-        for item in items {
-            if let Value::String(s) = item {
-                strings.push(s.clone());
-            } else {
-                return None;
-            }
-        }
-        return Some(strings);
-    }
-
-    if let Value::Blocks(blocks) = value {
-        let mut strings = Vec::new();
-        for b in blocks {
-            if let Block::Paragraph(p) = b {
-                for inline in &p.content {
-                    if let tomet_ast::Inline::Text(t) = inline {
-                        for part in t.value.split(',') {
-                            let trimmed = part.trim().trim_matches('"').trim_matches('\'');
-                            if !trimmed.is_empty() {
-                                strings.push(trimmed.to_string());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if !strings.is_empty() {
-            return Some(strings);
-        }
-    }
-
-    None
-}
-
-/// Reads a rule parameter's `{...}` as `key: [string, ...]` pairs.
+/// Reads a rule parameter's `( key: ("string", ...), ... )` tuple.
 ///
 /// Returns an error rather than skipping anything it cannot read: a rule
 /// half-understood is worse than a rule that refuses to run, because the
 /// half it dropped is exactly where a violation would hide.
-pub fn string_list_map(
-    entries: &[(String, Value)],
-    what: &str,
-) -> Result<Vec<(String, Vec<String>)>> {
-    entries
-        .iter()
+pub fn string_list_map(tuple: &Tuple, what: &str) -> Result<Vec<(String, Vec<String>)>> {
+    tuple
+        .keyed()
         .map(|(key, value)| {
-            if let Some(items) = as_list(value) {
-                let strings = items
-                    .iter()
-                    .map(|item| match item {
-                        Value::String(s) => Ok(s.clone()),
-                        other => {
-                            anyhow::bail!("{what}'s `{key}` holds a non-string entry: {other:?}")
-                        }
-                    })
-                    .collect::<Result<Vec<_>>>()?;
-                return Ok((key.clone(), strings));
-            }
-            if let Some(strings) = as_string_list(value) {
-                return Ok((key.clone(), strings));
-            }
-            anyhow::bail!("{what}'s `{key}` is not a list");
+            let items = string_list(value, what, &key)?;
+            Ok((key.into_owned(), items))
         })
         .collect()
 }
@@ -356,7 +336,7 @@ fn collect_rule_elements<'a>(
             Block::List(list) => {
                 collect_rule_list(list, is_rule, out);
             }
-            Block::Paragraph(_) | Block::Hole(_) | Block::Interp(_) => {}
+            Block::Paragraph(_) | Block::Hole(_) | Block::TypeSeat(_) | Block::Interp(_) => {}
         }
     }
 }

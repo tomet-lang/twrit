@@ -22,7 +22,7 @@ pub fn api(
                 twrit_rust::api::RustApiConfig::read(rule, path)?.out_dir
             } else {
                 anyhow::bail!(
-                    "no output directory specified and no `@rule` with `guard: {{ twrit: rust-api }}` found; pass `--out <DIR>`"
+                    "no output directory specified and no `@rule` with `guard: ( twrit: rust-api )` found; pass `--out <DIR>`"
                 );
             }
         }

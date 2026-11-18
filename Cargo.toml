@@ -37,6 +37,7 @@ tomet-formatter = { git = "https://github.com/tomet-lang/tomet.git" }
 tomet-load = { git = "https://github.com/tomet-lang/tomet.git" }
 tomet-ast-parser = { git = "https://github.com/tomet-lang/tomet.git" }
 tomet-printer = { git = "https://github.com/tomet-lang/tomet.git" }
+tomet-scalar = { git = "https://github.com/tomet-lang/tomet.git" }
 tomet-semantics = { git = "https://github.com/tomet-lang/tomet.git" }
 tomet-span = { git = "https://github.com/tomet-lang/tomet.git" }
 tomet-tree = { git = "https://github.com/tomet-lang/tomet.git" }

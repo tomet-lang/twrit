@@ -1,6 +1,6 @@
 ::kind(api)
 
-::meta{crate: twrit-core, dependencies: list(), dependents: list(twrit-cli, twrit-generic, twrit-python, twrit-rust, twrit-tests)}
+::meta(crate: twrit-core, dependencies: (), dependents: (twrit-cli, twrit-generic, twrit-python, twrit-rust, twrit-tests))
 
 =[twrit-core]
 
@@ -66,18 +66,16 @@ tomet repository's own `check-links` came to skip these files.
 
 Every rule across `writs` whose guard names `kind` as this tool's.
 
-====[fn as_list]
+====[fn string_list]
 
-Returns the slice of elements if `value` is either a sequence or a `list(...)` call.
+Reads `value` as an unnamed tuple of strings: `( "a", "b", ... )`.
 
-====[fn as_string_list]
-
-Extracts a list of strings from either a `Value::Seq`, a `list(...)` call,
-or bracketed `Value::Blocks`.
+Returns an error when `value` is not an unnamed tuple or when any entry is
+not a text scalar.
 
 ====[fn string_list_map]
 
-Reads a rule parameter's `{...}` as `key: [string, ...]` pairs.
+Reads a rule parameter's `( key: ("string", ...), ... )` tuple.
 
 Returns an error rather than skipping anything it cannot read: a rule
 half-understood is worse than a rule that refuses to run, because the

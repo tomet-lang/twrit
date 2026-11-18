@@ -5,12 +5,12 @@
 ==[ python-api-docs ]
 
 @rule(python-api-docs){
-  guard: { twrit: python-api }
+  guard: ( twrit: python-api )
 
-  api: {
+  api: (
     out: "docs/api"
-    packages: list("pkg")
-  }
+    packages: ("pkg")
+  )
 }
 
 Generate and check API documentation for Python package `pkg`.

@@ -7,13 +7,13 @@ Rules the Twrit repository obeys.
 ==[ crate-layering ]
 
 @rule(crate-layering){
-  guard: { twrit: layers }
+  guard: ( twrit: layers )
 
-  layers: {
-    2: list( "app", "tests" )
-    1: list( "crates/twrit-rust", "crates/twrit-python", "crates/twrit-generic" )
-    0: list( "crates/twrit-core" )
-  }
+  layers: (
+    2: ( "app", "tests" )
+    1: ( "crates/twrit-rust", "crates/twrit-python", "crates/twrit-generic" )
+    0: ( "crates/twrit-core" )
+  )
 }
 
 Every workspace member belongs to exactly one layer, and depends only on
@@ -23,11 +23,11 @@ upward ones are not.
 ==[ rust-api-docs ]
 
 @rule(rust-api-docs){
-  guard: { twrit: rust-api }
+  guard: ( twrit: rust-api )
 
-  rust_api: {
+  rust_api: (
     out: "tmtroot/generated/crates"
-  }
+  )
 }
 
 API documentation for all workspace Rust crates must be kept up to date

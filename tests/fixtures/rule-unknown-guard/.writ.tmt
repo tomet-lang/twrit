@@ -5,7 +5,7 @@
 ==[ crate-layering ]
 
 @rule(crate-layering){
-  guard: { by: "twrit" }
+  guard: ( by: "twrit" )
 }
 
 A holder this tool does not know. Refused by name rather than ignored: a

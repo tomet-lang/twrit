@@ -5,13 +5,13 @@
 ==[ parser-purity ]
 
 @rule(parser-purity){
-  guard: { twrit: pure }
+  guard: ( twrit: pure )
 
-  pure: {
-    crates: list("core")
-    forbid: list()
-    allow-external: list()
-  }
+  pure: (
+    crates: ("core")
+    forbid: ()
+    allow-external: ()
+  )
 }
 
 `core` names one dependency and it is internal. The closure is what

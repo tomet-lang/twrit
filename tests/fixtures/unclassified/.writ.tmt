@@ -7,11 +7,11 @@
 Every workspace member belongs to exactly one layer.
 
 @rule(crate-layering){
-  guard: { twrit: layers }
+  guard: ( twrit: layers )
 
-  layers: {
-    0: list("covered")
-  }
+  layers: (
+    0: ("covered")
+  )
 }
 
 `stray` is a member and appears in no layer. This is the half of the rule

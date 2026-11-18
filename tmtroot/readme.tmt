@@ -3,11 +3,11 @@
   path: "README.md"
 )
 ::id(doc-readme)
-::meta{
+::meta(
   lang: en
-}
+)
 
-${macro.generated_by(self.path)}
+$macro.generated_by(self::path)
 
 =[ Twrit ]
 

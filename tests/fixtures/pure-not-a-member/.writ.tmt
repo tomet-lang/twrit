@@ -5,13 +5,13 @@
 ==[ parser-purity ]
 
 @rule(parser-purity){
-  guard: { twrit: pure }
+  guard: ( twrit: pure )
 
-  pure: {
-    crates: list("nope")
-    forbid: list()
-    allow-external: list()
-  }
+  pure: (
+    crates: ("nope")
+    forbid: ()
+    allow-external: ()
+  )
 }
 
 A rule naming a crate that does not exist is checking nothing, and has to

@@ -7,6 +7,7 @@ edition.workspace = true
 #= Tomet
 tomet-ast = { workspace = true }
 tomet-load = { workspace = true }
+tomet-scalar = { workspace = true }
 tomet-semantics = { workspace = true }
 
 #= Crates.io

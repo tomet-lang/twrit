@@ -3,13 +3,13 @@
 ==[ placement-clean ]
 
 @rule(placement-clean){
-  guard: { twrit: placement }
+  guard: ( twrit: placement )
 
-  placement: {
+  placement: (
     within: "docs"
-    allow: list(
+    allow: (
       "spec/**/*.tmt",
       "README.tmt"
 )
-  }
+  )
 }

@@ -5,12 +5,12 @@
 ==[ subprocess-door ]
 
 @rule(subprocess-door){
-  guard: { twrit: python-door }
+  guard: ( twrit: python-door )
 
-  door: {
-    names: list("subprocess")
-    allowed: list("infra")
-  }
+  door: (
+    names: ("subprocess")
+    allowed: ("infra")
+  )
 }
 
 Only `infra` is allowed to use `subprocess`.

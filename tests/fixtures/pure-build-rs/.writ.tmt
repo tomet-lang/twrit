@@ -5,13 +5,13 @@
 ==[ parser-purity ]
 
 @rule(parser-purity){
-  guard: { twrit: pure }
+  guard: ( twrit: pure )
 
-  pure: {
-    crates: list("core")
-    forbid: list("std::fs")
-    allow-external: list()
-  }
+  pure: (
+    crates: ("core")
+    forbid: ("std::fs")
+    allow-external: ()
+  )
 }
 
 The forbidden path is in `core/build.rs`, not under `core/src/`. A build

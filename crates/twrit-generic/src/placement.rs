@@ -14,8 +14,9 @@ use anyhow::{Context, Result};
 use ignore::WalkBuilder;
 use ignore::overrides::OverrideBuilder;
 use tomet_ast::Value;
+use tomet_scalar::Scalar;
 
-use twrit_core::writ::Rule;
+use twrit_core::writ::{Rule, string_list};
 use twrit_core::{Outcome, plural};
 
 /// Configuration for the placement guard.
@@ -40,10 +41,10 @@ impl Placement {
         let mut within = rule_dir.to_path_buf();
         let mut allow = Vec::new();
 
-        for (key, value) in entries {
-            match key.as_str() {
+        for (key, value) in entries.keyed() {
+            match key.as_ref() {
                 "within" => {
-                    let Value::String(s) = value else {
+                    let Value::Scalar(Scalar::Text(s)) = value else {
                         anyhow::bail!("`placement`'s `within` is not a string");
                     };
                     if s == "." {
@@ -60,7 +61,7 @@ impl Placement {
                     }
                 }
                 "allow" => {
-                    allow = strings(key, value)?;
+                    allow = string_list(value, "`placement`", &key)?;
                 }
                 other => anyhow::bail!("`placement` does not know the key `{other}`"),
             }
@@ -69,22 +70,6 @@ impl Placement {
         anyhow::ensure!(!allow.is_empty(), "`placement` names no allowed patterns");
         Ok(Placement { within, allow })
     }
-}
-
-fn strings(key: &str, value: &Value) -> Result<Vec<String>> {
-    if let Some(items) = twrit_core::writ::as_list(value) {
-        return items
-            .iter()
-            .map(|item| match item {
-                Value::String(s) => Ok(s.clone()),
-                other => anyhow::bail!("`placement`'s `{key}` holds a non-string entry: {other:?}"),
-            })
-            .collect();
-    }
-    if let Some(items) = twrit_core::writ::as_string_list(value) {
-        return Ok(items);
-    }
-    anyhow::bail!("`placement`'s `{key}` is not a list");
 }
 
 /// Runs the placement guard.

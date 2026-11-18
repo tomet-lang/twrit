@@ -11,10 +11,11 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result};
 use rustpython_ast::{Arguments, Expr, ExprConstant, Mod, Stmt};
 use rustpython_parser::{Mode, parse};
-use tomet_ast::{Block, File, Group, Inline, Paragraph, Section, Text, Value};
+use tomet_ast::{Block, File, Inline, Paragraph, Section, Text, Tuple, Value};
+use tomet_scalar::Scalar;
 use tomet_span::Span;
 use tomet_tree::declaration_new;
-use twrit_core::writ::Rule;
+use twrit_core::writ::{Rule, string_list};
 use twrit_core::{Outcome, plural};
 
 /// Options controlling extraction of Python code documentation.
@@ -54,32 +55,24 @@ impl PythonApiConfig {
         let mut packages = Vec::new();
         let mut private = false;
 
-        for (key, val) in entries {
-            match key.as_str() {
+        for (key, val) in entries.keyed() {
+            match key.as_ref() {
                 "out" => {
-                    if let Value::String(s) = val {
-                        out_str = Some(s.clone());
-                    } else {
-                        anyhow::bail!("`api.out` must be a string");
-                    }
+                    let Value::Scalar(Scalar::Text(s)) = val else {
+                        anyhow::bail!("`api`'s `out` is not a string");
+                    };
+                    out_str = Some(s.clone());
                 }
                 "packages" => {
-                    if let Some(list) = twrit_core::writ::as_list(val) {
-                        for item in list {
-                            if let Value::String(s) = item {
-                                packages.push(s.clone());
-                            }
-                        }
-                    } else {
-                        anyhow::bail!("`api.packages` must be a list of strings");
-                    }
+                    packages = string_list(val, "`api`", &key)?;
                 }
                 "private" => {
-                    if let Value::String(s) = val {
-                        private = s == "true";
-                    }
+                    let Value::Scalar(Scalar::Bool(b)) = val else {
+                        anyhow::bail!("`api`'s `private` is not a boolean");
+                    };
+                    private = *b;
                 }
-                _ => {}
+                other => anyhow::bail!("`api` does not know the key `{other}`"),
             }
         }
 
@@ -203,14 +196,19 @@ pub fn extract_module_doc(
 
     let mut header = Vec::new();
 
-    // 1. Header: ::kind(api) and ::meta{ module: "..." }
+    // 1. Header: ::kind(api) and ::meta( module: "..." )
     let mut kind_decl = declaration_new("kind");
-    kind_decl.data.args = Some(Value::String("api".to_string()));
+    kind_decl.data.args = Some(Tuple::from_unnamed([Value::Scalar(Scalar::Text(
+        "api".to_string(),
+    ))]));
     header.push(kind_decl);
 
-    let meta_pairs = vec![("module".to_string(), Value::String(module_name.to_string()))];
+    let meta_pairs = vec![(
+        "module".to_string(),
+        Value::Scalar(Scalar::Text(module_name.to_string())),
+    )];
     let mut meta_decl = declaration_new("meta");
-    meta_decl.data.value = Some(Group::from_map(Value::Map(meta_pairs)));
+    meta_decl.data.args = Some(Tuple::from_named(meta_pairs));
     header.push(meta_decl);
 
     let mut blocks = Vec::new();

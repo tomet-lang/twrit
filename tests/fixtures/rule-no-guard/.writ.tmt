@@ -5,9 +5,9 @@
 ==[ crate-layering ]
 
 @rule(crate-layering){
-  layers: {
-    0: list("thing")
-  }
+  layers: (
+    0: ("thing")
+  )
 }
 
 A rule with parameters and no `guard`. Nothing says who holds it, and the

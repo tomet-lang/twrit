@@ -4,7 +4,7 @@
 
 ==[ crate-layering ]
 
-@rule(crate-layering){ guard: { twrit: layers } }
+@rule(crate-layering){ guard: ( twrit: layers ) }
 
 The declaration carries no `{...}`, so there is nothing to read. Written
 with empty `(...)` because a bare `@layers` is not seen as an element at

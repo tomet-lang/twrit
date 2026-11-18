@@ -5,12 +5,12 @@
 ==[ file-io ]
 
 @rule(file-io){
-  guard: { twrit: door }
+  guard: ( twrit: door )
 
-  door: {
-    names: list("std::fs")
-    allowed: list("reader")
-  }
+  door: (
+    names: ("std::fs")
+    allowed: ("reader")
+  )
 }
 
 `reader` is the door. `other` is not on the list and reads a file anyway,

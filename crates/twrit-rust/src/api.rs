@@ -14,7 +14,8 @@ use std::path::{Path, PathBuf};
 use crate::metadata::{self, Flavour};
 use anyhow::{Context, Result};
 use rayon::prelude::*;
-use tomet_ast::{Block, File, Group, Inline, Paragraph, Section, Text, Value};
+use tomet_ast::{Block, File, Inline, Paragraph, Section, Text, Tuple, Value};
+use tomet_scalar::Scalar;
 use tomet_span::Span;
 use tomet_tree::declaration_new;
 use twrit_core::writ::Rule;
@@ -84,40 +85,42 @@ pub fn extract_crate_doc(
 
     let mut header = Vec::new();
 
-    // 1. Header declarations: ::kind(api) and ::meta{ crate: "...", dependencies: list(...), dependents: list(...) }
+    // 1. Header declarations: ::kind(api) and ::meta( crate: "...", dependencies: (...), dependents: (...) )
     let mut kind_decl = declaration_new("kind");
-    kind_decl.data.args = Some(Value::String("api".to_string()));
+    kind_decl.data.args = Some(Tuple::from_unnamed([Value::Scalar(Scalar::Text(
+        "api".to_string(),
+    ))]));
     header.push(kind_decl);
 
-    let mut meta_pairs = vec![(
-        "crate".to_string(),
-        Value::String(crate_source.crate_name.clone()),
-    )];
-    meta_pairs.push((
-        "dependencies".to_string(),
-        Value::Seq(
-            crate_source
-                .dependencies
-                .iter()
-                .cloned()
-                .map(Value::String)
-                .collect(),
+    let meta_pairs = vec![
+        (
+            "crate".to_string(),
+            Value::Scalar(Scalar::Text(crate_source.crate_name.clone())),
         ),
-    ));
-    meta_pairs.push((
-        "dependents".to_string(),
-        Value::Seq(
-            crate_source
-                .dependents
-                .iter()
-                .cloned()
-                .map(Value::String)
-                .collect(),
+        (
+            "dependencies".to_string(),
+            Value::Tuple(Tuple::from_unnamed(
+                crate_source
+                    .dependencies
+                    .iter()
+                    .cloned()
+                    .map(|s| Value::Scalar(Scalar::Text(s))),
+            )),
         ),
-    ));
+        (
+            "dependents".to_string(),
+            Value::Tuple(Tuple::from_unnamed(
+                crate_source
+                    .dependents
+                    .iter()
+                    .cloned()
+                    .map(|s| Value::Scalar(Scalar::Text(s))),
+            )),
+        ),
+    ];
 
     let mut meta_decl = declaration_new("meta");
-    meta_decl.data.value = Some(Group::from_map(Value::Map(meta_pairs)));
+    meta_decl.data.args = Some(Tuple::from_named(meta_pairs));
     header.push(meta_decl);
 
     let mut blocks = Vec::new();
@@ -550,40 +553,39 @@ pub struct RustApiConfig {
 
 impl RustApiConfig {
     pub fn read(rule: &Rule, root: &Path) -> Result<Self> {
+        let entries = rule.map("rust_api").with_context(|| {
+            format!(
+                "{}: `@rule({})` guards `rust-api` but declares no `rust_api:` parameter",
+                rule.path.display(),
+                rule.id
+            )
+        })?;
+
         let mut out_str = None;
         let mut private = false;
 
-        // Try reading from `rust_api: { ... }` or `rust-api: { ... }`
-        let map_entries = rule.map("rust_api").or_else(|| rule.map("rust-api"));
-        if let Some(entries) = map_entries {
-            for (k, v) in entries {
-                if k == "out" {
-                    if let Value::String(s) = v {
-                        out_str = Some(s.clone());
-                    }
-                } else if k == "private" {
-                    if let Value::Bool(b) = v {
-                        private = *b;
-                    }
+        for (k, v) in entries.keyed() {
+            match k.as_ref() {
+                "out" => {
+                    let Value::Scalar(Scalar::Text(s)) = v else {
+                        anyhow::bail!("`rust_api`'s `out` is not a string");
+                    };
+                    out_str = Some(s.clone());
                 }
-            }
-        }
-
-        // If not found in map, check top-level entry `out: "..."`
-        if out_str.is_none() {
-            for entry in rule.group() {
-                if let tomet_ast::Entry::Pair(k, Value::String(s)) = entry {
-                    if k == "out" {
-                        out_str = Some(s.clone());
-                    }
+                "private" => {
+                    let Value::Scalar(Scalar::Bool(b)) = v else {
+                        anyhow::bail!("`rust_api`'s `private` is not a boolean");
+                    };
+                    private = *b;
                 }
+                other => anyhow::bail!("`rust_api` does not know the key `{other}`"),
             }
         }
 
         let out_path_str = out_str.with_context(|| {
             format!(
-                "{}: `@rule({})` declares no `out` destination path; \
-                 specify `out: \"<DIR>\"` or `rust_api: {{ out: \"<DIR>\" }}`",
+                "{}: `@rule({})`'s `rust_api` declares no `out` destination path; \
+                 specify `rust_api: ( out: \"<DIR>\" )`",
                 rule.path.display(),
                 rule.id
             )
@@ -885,8 +887,8 @@ pub fn sub_fn() {}
         assert!(printed.contains("Module sub"));
         assert!(printed.contains("Submodule documentation."));
         assert!(printed.contains("fn sub_fn"));
-        assert!(printed.contains("dependencies: list(dep-a, dep-b)"));
-        assert!(printed.contains("dependents: list(downstream-c)"));
+        assert!(printed.contains("dependencies: (dep-a, dep-b)"));
+        assert!(printed.contains("dependents: (downstream-c)"));
     }
 
     #[test]

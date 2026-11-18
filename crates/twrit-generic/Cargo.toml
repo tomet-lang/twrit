@@ -9,6 +9,7 @@ twrit-core = { workspace = true }
 #= Tomet
 tomet-ast = { workspace = true }
 tomet-extract = { workspace = true }
+tomet-scalar = { workspace = true }
 
 #= Crates.io
 anyhow = { workspace = true }

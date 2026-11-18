@@ -5,10 +5,10 @@
 ==[ crate-layering ]
 
 @rule(crate-layering){
-  guard: { twrit: layers }
+  guard: ( twrit: layers )
 
-  layers: {
-  }
+  layers: (
+  )
 }
 
 An empty declaration would classify nothing, and then report every

@@ -5,12 +5,12 @@
 ==[ parser-purity ]
 
 @rule(parser-purity){
-  guard: { twrit: pure }
+  guard: ( twrit: pure )
 
-  pure: {
-    crates: list("core")
-    colour: list("red")
-  }
+  pure: (
+    crates: ("core")
+    colour: ("red")
+  )
 }
 
 A key this tool does not implement is a rule the author believes is being

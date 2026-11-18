@@ -5,9 +5,9 @@
 ==[ crate-layering ]
 
 @rule(crate-layering){
-  guard: { twrit: layers }
+  guard: ( twrit: layers )
 
-  layers: {
-    0: list("thing")
-  }
+  layers: (
+    0: ("thing")
+  )
 }

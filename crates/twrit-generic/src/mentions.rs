@@ -8,9 +8,10 @@ use std::collections::HashSet;
 use std::path::Path;
 
 use anyhow::{Context, Result};
-use tomet_ast::Value;
+use tomet_ast::{Tuple, Value};
 use tomet_extract::{Language, collect_comment_elements};
-use twrit_core::writ::Rule;
+use tomet_scalar::Scalar;
+use twrit_core::writ::{Rule, string_list};
 use twrit_core::{Outcome, plural};
 
 pub fn check(rule: &Rule, root: &Path) -> Result<Outcome> {
@@ -25,18 +26,13 @@ pub fn check(rule: &Rule, root: &Path) -> Result<Outcome> {
         .map(|r| r.id)
         .collect();
 
-    // 2. Read optional configuration parameters (e.g. within, exclude)
+    // 2. Read optional configuration parameters (e.g. within)
     let mut within_patterns = Vec::new();
     if let Some(entries) = rule.map("mentions") {
-        for (key, val) in entries {
-            if key == "within" {
-                if let Some(list) = twrit_core::writ::as_list(val) {
-                    for item in list {
-                        if let Value::String(s) = item {
-                            within_patterns.push(s.clone());
-                        }
-                    }
-                }
+        for (key, val) in entries.keyed() {
+            match key.as_ref() {
+                "within" => within_patterns = string_list(val, "`mentions`", &key)?,
+                other => anyhow::bail!("`mentions` does not know the key `{other}`"),
             }
         }
     }
@@ -94,15 +90,14 @@ pub fn check(rule: &Rule, root: &Path) -> Result<Outcome> {
         // Extract all tomet elements in comments
         let elements = collect_comment_elements(&source, path);
         for (el, span, _) in elements {
-            if el.name.is_bare_named("rule") {
-                if let Some(Value::String(rule_id)) = &el.data.args {
-                    if !declared_rules.contains(rule_id) {
-                        violations.push(format!(
-                            "{rel_path}:{}: mentions `@rule({rule_id})`, which is not declared in any writ",
-                            line_of(&source, span.start)
-                        ));
-                    }
-                }
+            if el.name.is_bare_named("rule")
+                && let Some(rule_id) = rule_id(el.data.args.as_ref())
+                && !declared_rules.contains(rule_id)
+            {
+                violations.push(format!(
+                    "{rel_path}:{}: mentions `@rule({rule_id})`, which is not declared in any writ",
+                    line_of(&source, span.start)
+                ));
             }
         }
     }
@@ -111,6 +106,14 @@ pub fn check(rule: &Rule, root: &Path) -> Result<Outcome> {
     violations.dedup();
 
     Ok(Outcome::checked(plural(checked_files, "file"), violations))
+}
+
+fn rule_id(args: Option<&Tuple>) -> Option<&str> {
+    let args = args.filter(|t| t.len() == 1 && t.has_no_named())?;
+    match args.nth_unnamed(0)? {
+        Value::Scalar(Scalar::Text(id)) => Some(id.as_str()),
+        _ => None,
+    }
 }
 
 /// The 1-based line of byte `offset` in `source`.
@@ -134,10 +137,7 @@ def execute():
         let rule_refs: Vec<String> = elements
             .into_iter()
             .filter(|(el, _, _)| el.name.is_bare_named("rule"))
-            .filter_map(|(el, _, _)| match el.data.args {
-                Some(Value::String(s)) => Some(s),
-                _ => None,
-            })
+            .filter_map(|(el, _, _)| rule_id(el.data.args.as_ref()).map(str::to_string))
             .collect();
 
         assert_eq!(rule_refs, vec!["subprocess-door"]);

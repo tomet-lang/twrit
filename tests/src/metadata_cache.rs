@@ -83,22 +83,22 @@ fn cached_failure_is_reported_against_every_rule() {
 ==[ crate-layering ]
 
 @rule(rule-layers){
-  guard: { twrit: layers }
+  guard: ( twrit: layers )
 
-  layers: {
-    0: list("core")
-  }
+  layers: (
+    0: ("core")
+  )
 }
 
 ==[ file-io ]
 
 @rule(rule-door){
-  guard: { twrit: door }
+  guard: ( twrit: door )
 
-  door: {
-    names: list("std::fs")
-    allowed: list("core")
-  }
+  door: (
+    names: ("std::fs")
+    allowed: ("core")
+  )
 }
 "#,
     )

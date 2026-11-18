@@ -3,11 +3,11 @@
   path: "CONTRIBUTING.md"
 )
 ::id(doc-contributing)
-::meta{
+::meta(
   lang: en
-}
+)
 
-${macro.generated_by(self.path)}
+$macro.generated_by(self::path)
 
 =[ Contributing to twrit ]
 

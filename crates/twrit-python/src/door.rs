@@ -8,8 +8,7 @@ use std::path::Path;
 use anyhow::{Context, Result};
 use rustpython_ast::{Mod, Stmt};
 use rustpython_parser::{Mode, parse};
-use tomet_ast::Value;
-use twrit_core::writ::Rule;
+use twrit_core::writ::{Rule, string_list};
 use twrit_core::{Outcome, plural};
 
 /// What capability is restricted, and who is allowed it.
@@ -49,11 +48,11 @@ impl Door {
         let mut allowed = Vec::new();
         let mut within = Vec::new();
 
-        for (key, value) in entries {
-            match key.as_str() {
-                "names" => names = parse_string_list(key, value)?,
-                "allowed" => allowed = parse_string_list(key, value)?,
-                "within" => within = parse_string_list(key, value)?,
+        for (key, value) in entries.keyed() {
+            match key.as_ref() {
+                "names" => names = string_list(value, "`door`", &key)?,
+                "allowed" => allowed = string_list(value, "`door`", &key)?,
+                "within" => within = string_list(value, "`door`", &key)?,
                 other => anyhow::bail!("`door` does not know the key `{other}`"),
             }
         }
@@ -65,19 +64,6 @@ impl Door {
             within,
         })
     }
-}
-
-fn parse_string_list(key: &str, value: &Value) -> Result<Vec<String>> {
-    let Some(items) = twrit_core::writ::as_list(value) else {
-        anyhow::bail!("`door`'s `{key}` is not a list");
-    };
-    items
-        .iter()
-        .map(|item| match item {
-            Value::String(s) => Ok(s.clone()),
-            other => anyhow::bail!("`door`'s `{key}` holds a non-string entry: {other:?}"),
-        })
-        .collect()
 }
 
 /// Checks whether a Python file imports or references any of `needle_names`.

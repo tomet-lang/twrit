@@ -5,11 +5,11 @@
 ==[ crate-layering ]
 
 @rule(crate-layering){
-  guard: { twrit: layers }
+  guard: ( twrit: layers )
 
-  layers: {
-    1: list(42)
-  }
+  layers: (
+    1: (42)
+  )
 }
 
 Patterns are directory paths, so every entry has to be a string.

@@ -5,11 +5,11 @@
 ==[ parser-purity ]
 
 @rule(parser-purity){
-  guard: { twrit: pure }
+  guard: ( twrit: pure )
 
-  pure: {
-    allow-external: list()
-  }
+  pure: (
+    allow-external: ()
+  )
 }
 
 No crate is named, so the declaration binds nothing.

@@ -5,11 +5,11 @@
 ==[ crate-layering ]
 
 @rule(crate-layering){
-  guard: { twrit: layers }
+  guard: ( twrit: layers )
 
-  layers: {
-    low: list("thing")
-  }
+  layers: (
+    low: ("thing")
+  )
 }
 
 A layer key has to be a number, because the whole rule is an ordering.

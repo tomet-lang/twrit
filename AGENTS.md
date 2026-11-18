@@ -82,9 +82,9 @@ An entry is one element:
 ##[ any wording the author likes ]
 
 @rule(crate-layering){
-  guard: { twrit: layers }
+  guard: ( twrit: layers )
 
-  layers: { 6: [ "apps/*" ], 5: [ ... ] }
+  layers: ( 6: ( "apps/*" ), 5: ( ... ) )
 }
 
 Every workspace member belongs to exactly one layer ...
@@ -105,10 +105,10 @@ rule had existed, without anything reporting it.
 
 | Spelling | Means | What this tool does |
 | --- | --- | --- |
-| `{ twrit: kind }` | a kind implemented here | runs it; parameters come from the same group |
-| `{ runs: "just docs-check" }` | a runner the repository ships | records it, never executes it |
-| `{ test: "tests/src/x.rs" }` | a test over there | can check the path still exists |
-| `{ none: "why not" }` | nobody, said out loud | counts it |
+| `( twrit: kind )` | a kind implemented here | runs it; parameters come from the same group |
+| `( runs: "just docs-check" )` | a runner the repository ships | records it, never executes it |
+| `( test: "tests/src/x.rs" )` | a test over there | can check the path still exists |
+| `( none: "why not" )` | nobody, said out loud | counts it |
 
 `none:` must carry a reason, and a rule with no `guard:` at all is an
 error. "Nobody holds this" and "somebody forgot" must not look alike --
@@ -137,8 +137,8 @@ dropped is where a violation would hide.
 Prefer a shape the parser already types. `@table`'s content arrives as one
 flat `Text` node, and bare children hold inline markup where `apps/*` opens
 a block comment -- both would mean string surgery in the guard. A plain
-value group of `key: [ "string", ... ]` arrives as
-`Entry::Pair(String, Seq([String, ...]))` and needs no parsing at all.
+value group of `key: ( "string", ... )` arrives as
+`Entry::Pair(String, Tuple(...))` and needs no parsing at all.
 
 ## Two questions, two commands
 
@@ -175,11 +175,11 @@ written; a second place appeared and nothing reported it, because a
 sentence saying "only" has no way to notice.
 
 ```tmt
-door: {
-  names: [ "std::fs" ]
-  within: [ "crates/*" ]
-  allowed: [ "crates/tomet-config", ... ]
-}
+door: (
+  names: ( "std::fs" )
+  within: ( "crates/*" )
+  allowed: ( "crates/tomet-config", ... )
+)
 ```
 
 The quantifier is the difference from `pure`, and it is the whole point.
