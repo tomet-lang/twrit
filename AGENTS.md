@@ -106,6 +106,7 @@ rule had existed, without anything reporting it.
 | Spelling | Means | What this tool does |
 | --- | --- | --- |
 | `( twrit: kind )` | a kind implemented here | runs it; parameters come from the same group |
+| `( script: "scripts/x.ts" )` | a script in the repository | checks path exists and executes it on `check` |
 | `( runs: "just docs-check" )` | a runner the repository ships | records it, never executes it |
 | `( test: "tests/src/x.rs" )` | a test over there | can check the path still exists |
 | `( none: "why not" )` | nobody, said out loud | counts it |

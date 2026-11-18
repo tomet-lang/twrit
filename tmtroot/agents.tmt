@@ -10,24 +10,29 @@ $macro.generated_by(self::path)
 ==[ Core Philosophy & Principles ]
 
 ===[ Precedence of Instructions ]
+
 The rules in this document serve as the project baseline and defaults. Explicit instructions given by the user in a conversation always take precedence over these defaults.
 
 ===[ User-First Design over Developer Convenience ]
+
 Always prioritize the end-user experience, syntax ergonomics, and API design.
 If there is tension between developer or implementation convenience and user simplicity, user simplicity must always win. Never compromise user experience just because an implementation is easier.
 
 ===[ Resist Path-of-Least-Resistance & Legacy Bias ]
+
 The existing implementation is never a justification or reason for new design choices.
 -| Do not justify decisions with "it is already implemented this way, so let's stick with it."
 -| Prioritize architectural beauty, elegance, and long-term correctness over the path of least resistance.
 -| Understand the existing context thoroughly, but never take shortcuts or settle for lazy patches.
 
 ===[ Transparent Execution ]
+
 Always state what you intend to do before doing it. Never execute non-trivial actions or commands silently.
 
 ==[ Single Source of Truth & Documentation ]
 
 ===[ Never edit `.md` directly ]
+
 All Markdown files (`README.md`, `AGENTS.md`, `CLAUDE.md`) are generated build artifacts, not source files.
 - Never edit a `.md` file directly.
 - Always edit the corresponding `.tmt` file under @dir(tmtroot/).
@@ -77,18 +82,18 @@ this crate.
 An entry is one element:
 
 ```tmt
-##[ any wording the author likes ]
-
-@rule(crate-layering){
-  guard: ( twrit: layers )
-
-  layers: ( 6: ( "apps/*" ), 5: ( ... ) )
-}
-
-Every workspace member belongs to exactly one layer ...
-
----[ Why ]---
-...
+`` ##[ any wording the author likes ]
+``
+`` @rule(crate-layering){
+``   guard: ( twrit: layers )
+``
+``   layers: ( 6: ( "apps/*" ), 5: ( ... ) )
+`` }
+``
+`` Every workspace member belongs to exactly one layer ...
+``
+`` ---[ Why ]---
+`` ...
 ```
 
 The heading is prose and will be reworded; `@rule(id)` is the name a tool
@@ -104,6 +109,7 @@ rule had existed, without anything reporting it.
 | Spelling | Means | What this tool does |
 | --- | --- | --- |
 | `( twrit: kind )` | a kind implemented here | runs it; parameters come from the same group |
+| `( script: "scripts/x.ts" )` | a script in the repository | checks path exists and executes it on `check` |
 | `( runs: "just docs-check" )` | a runner the repository ships | records it, never executes it |
 | `( test: "tests/src/x.rs" )` | a test over there | can check the path still exists |
 | `( none: "why not" )` | nobody, said out loud | counts it |
@@ -173,11 +179,11 @@ written; a second place appeared and nothing reported it, because a
 sentence saying "only" has no way to notice.
 
 ```tmt
-door: (
-  names: ( "std::fs" )
-  within: ( "crates/*" )
-  allowed: ( "crates/tomet-config", ... )
-)
+`` door: (
+``   names: ( "std::fs" )
+``   within: ( "crates/*" )
+``   allowed: ( "crates/tomet-config", ... )
+`` )
 ```
 
 The quantifier is the difference from `pure`, and it is the whole point.
@@ -269,8 +275,8 @@ This is a CLI with no interactive surface. Verify with `cargo build`,
 `cargo test` and by running it:
 
 ```bash
-cargo test -p twrit-tests
-cargo run -- check ../tomet
+`` cargo test -p twrit-tests
+`` cargo run -- check ../tomet
 ```
 
 A guard is not finished when it passes. **Make it fail before you believe

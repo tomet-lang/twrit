@@ -1,0 +1,12 @@
+::kind(writ)
+
+=[ Writ: script-fail-with-why fixture ]
+
+==[ no-todo ]
+
+@rule(no-todo){
+  guard: ( script: "scripts/check.sh" )
+  why: | Unresolved TODOs drift out of sight.
+       |
+       | Track tasks in @dir(docs/) instead.
+}

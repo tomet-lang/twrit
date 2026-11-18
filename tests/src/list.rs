@@ -40,3 +40,19 @@ fn a_repository_with_no_writ_says_so() {
         )
     );
 }
+
+#[test]
+fn a_present_script_is_listed_with_script_holder() {
+    assert_eq!(
+        twrit_tests::list("script-pass"),
+        "clean-script  script  scripts/check.sh\n\n1 writ, 1 rule\n"
+    );
+}
+
+#[test]
+fn a_missing_script_is_marked_missing_in_list() {
+    assert_eq!(
+        twrit_tests::list("script-missing"),
+        "missing-script  script  scripts/missing.sh -- MISSING\n\n1 writ, 1 rule, 1 dead guard\n"
+    );
+}

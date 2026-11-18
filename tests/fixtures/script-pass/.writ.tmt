@@ -1,0 +1,10 @@
+::kind(writ)
+
+=[ Writ: script-pass fixture ]
+
+==[ clean-script ]
+
+@rule(clean-script){
+  guard: ( script: "scripts/check.sh" )
+  why: | This why should not appear when the rule passes.
+}

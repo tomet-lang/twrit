@@ -8,8 +8,9 @@ pub mod writ;
 
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
+use std::process::Command;
 
-use anyhow::Result;
+use anyhow::{Context as _, Result};
 use writ::Rule;
 
 /// What one rule did on this run.
@@ -31,6 +32,7 @@ impl Outcome {
 /// One rule's result, reported under the id its writ gave it.
 pub struct RuleResult {
     pub id: String,
+    pub why: Option<String>,
     pub outcome: Outcome,
 }
 
@@ -90,6 +92,19 @@ impl Report {
             for violation in rule.outcome.violations() {
                 let _ = writeln!(out, "{}: {violation}", rule.id);
             }
+            if !rule.outcome.violations().is_empty()
+                && let Some(why) = &rule.why
+            {
+                for (i, line) in why.lines().enumerate() {
+                    if i == 0 {
+                        let _ = writeln!(out, "  why: {line}");
+                    } else if line.is_empty() {
+                        let _ = writeln!(out);
+                    } else {
+                        let _ = writeln!(out, "       {line}");
+                    }
+                }
+            }
         }
 
         let summary: Vec<String> = self
@@ -117,12 +132,16 @@ impl Report {
             let _ = write!(census, ", {}", plural(self.dead_guards.len(), "dead guard"));
         }
 
-        let _ = writeln!(
-            out,
-            "{}, {census}, {}",
-            plural(self.writ_count, "writ"),
-            summary.join(", ")
-        );
+        if summary.is_empty() {
+            let _ = writeln!(out, "{}, {census}", plural(self.writ_count, "writ"));
+        } else {
+            let _ = writeln!(
+                out,
+                "{}, {census}, {}",
+                plural(self.writ_count, "writ"),
+                summary.join(", ")
+            );
+        }
         out
     }
 }
@@ -211,6 +230,7 @@ pub fn list(root: &Path, guards: &[Guard]) -> Result<Listing> {
                 writ::Guard::Twrit(kind) => {
                     ("twrit", kind.clone(), !known_kinds.contains(&kind.as_str()))
                 }
+                writ::Guard::Script(path) => ("script", path.clone(), false),
                 writ::Guard::Runs(cmd) => ("runs", cmd.clone(), false),
                 writ::Guard::Test(path) => ("test", path.clone(), false),
                 writ::Guard::None(why) => ("none", why.clone(), false),
@@ -287,17 +307,31 @@ pub fn check(root: &Path, guards: &[Guard]) -> Result<Report> {
 
     let mut rules = Vec::new();
     for rule in &declared {
-        let writ::Guard::Twrit(kind) = &rule.guard else {
-            continue;
-        };
-        let Some(guard) = guards.iter().find(|g| g.kind == kind.as_str()) else {
-            unreachable!("checked against known_kinds above");
-        };
-        let outcome = (guard.check)(rule, root)?;
-        rules.push(RuleResult {
-            id: rule.id.clone(),
-            outcome,
-        });
+        match &rule.guard {
+            writ::Guard::Twrit(kind) => {
+                let Some(guard) = guards.iter().find(|g| g.kind == kind.as_str()) else {
+                    unreachable!("checked against known_kinds above");
+                };
+                let outcome = (guard.check)(rule, root)?;
+                rules.push(RuleResult {
+                    id: rule.id.clone(),
+                    why: rule.why.clone(),
+                    outcome,
+                });
+            }
+            writ::Guard::Script(rel_path) => {
+                if rule.guard.dead_pointer(root).is_some() {
+                    continue;
+                }
+                let outcome = run_script(rule, root, rel_path)?;
+                rules.push(RuleResult {
+                    id: rule.id.clone(),
+                    why: rule.why.clone(),
+                    outcome,
+                });
+            }
+            writ::Guard::Runs(_) | writ::Guard::Test(_) | writ::Guard::None(_) => continue,
+        }
     }
     jobserver_gate::reclaim_implicit_token();
 
@@ -319,4 +353,38 @@ pub fn check(root: &Path, guards: &[Guard]) -> Result<Report> {
             .count(),
         rules,
     })
+}
+
+fn run_script(rule: &Rule, root: &Path, rel_path: &str) -> Result<Outcome> {
+    let script_path = root.join(rel_path);
+    let output = Command::new(&script_path)
+        .current_dir(root)
+        .output()
+        .with_context(|| {
+            format!(
+                "{}: failed to execute script `{rel_path}` for `@rule({})`",
+                rule.path.display(),
+                rule.id
+            )
+        })?;
+
+    if output.status.success() {
+        return Ok(Outcome::checked("script".to_string(), Vec::new()));
+    }
+
+    let mut violations = Vec::new();
+    for stream in [&output.stdout, &output.stderr] {
+        let text = String::from_utf8_lossy(stream);
+        for line in text.lines() {
+            let trimmed = line.trim_end();
+            if !trimmed.trim().is_empty() {
+                violations.push(trimmed.to_string());
+            }
+        }
+    }
+    if violations.is_empty() {
+        violations.push(format!("script `{rel_path}` exited with {}", output.status));
+    }
+
+    Ok(Outcome::checked("script".to_string(), violations))
 }

@@ -314,8 +314,8 @@ fn an_unknown_guard_holder_is_refused() {
     assert_eq!(
         twrit_tests::check_err("rule-unknown-guard"),
         format!(
-            "{}: `@rule(crate-layering)`'s guard holder `by` is not one of `twrit`, `runs`, \
-             `test`, `none`",
+            "{}: `@rule(crate-layering)`'s guard holder `by` is not one of `twrit`, `script`, \
+             `runs`, `test`, `none`",
             twrit_tests::fixture("rule-unknown-guard")
                 .join(".writ.tmt")
                 .display()
@@ -428,5 +428,35 @@ fn a_layer_named_by_crate_element_passes() {
     assert_eq!(
         twrit_tests::check("layers-crate-element"),
         "1 writ, 1 rule, crate-layering: ok (2 members)\n"
+    );
+}
+
+// -- script guards and why context -------------------------------------
+
+#[test]
+fn a_passing_script_guard_succeeds_without_printing_why() {
+    assert_eq!(
+        twrit_tests::check("script-pass"),
+        "1 writ, 1 rule, clean-script: ok (script)\n"
+    );
+}
+
+#[test]
+fn a_failing_script_guard_reports_violations_and_why() {
+    assert_eq!(
+        twrit_tests::check("script-fail-with-why"),
+        "no-todo: src/lib.rs:3: found TODO comment\n  \
+         why: Unresolved TODOs drift out of sight.\n\n       \
+         Track tasks in @dir(docs/) instead.\n\
+         1 writ, 1 rule, no-todo: 1 violation (script)\n"
+    );
+}
+
+#[test]
+fn a_missing_script_guard_is_reported_as_a_dead_guard() {
+    assert_eq!(
+        twrit_tests::check("script-missing"),
+        "missing-script: guard names scripts/missing.sh, which does not exist\n\
+         1 writ, 1 rule, 1 dead guard\n"
     );
 }

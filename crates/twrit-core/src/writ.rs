@@ -41,6 +41,9 @@ pub enum Guard {
     /// A rule kind this tool implements. Parameters come from the same
     /// group.
     Twrit(String),
+    /// A script in the repository, executed by `twrit check` with working
+    /// directory set to the checked root.
+    Script(String),
     /// A runner the repository already ships. Recorded, never executed.
     Runs(String),
     /// A test in the repository being checked. What can be verified from
@@ -54,19 +57,20 @@ pub enum Guard {
 impl Guard {
     /// What this guard points at, when the pointer no longer resolves.
     ///
-    /// Only `test:` can be followed. `runs:` names a runner this tool does
-    /// not execute, and verifying it would mean knowing every runner a
-    /// repository might ship; `twrit:` is checked against `KINDS` before
-    /// anything runs; `none:` points at nothing by construction.
+    /// `test:` and `script:` are paths in the repository and can be checked
+    /// for existence. `runs:` names a runner this tool does not execute, and
+    /// verifying it would mean knowing every runner a repository might ship;
+    /// `twrit:` is checked against `KINDS` before anything runs; `none:`
+    /// points at nothing by construction.
     ///
-    /// Existence is a weak proxy and says so: a file that is there may
-    /// hold no test at all. It is one-sided on purpose -- a path that
-    /// resolves proves nothing, and a path that does not proves the rule
-    /// is held by nobody.
+    /// For `test:`, existence is a weak proxy and says so: a file that is
+    /// there may hold no test at all. It is one-sided on purpose -- a path
+    /// that resolves proves nothing, and a path that does not proves the
+    /// rule is held by nobody.
     pub fn dead_pointer(&self, root: &Path) -> Option<&str> {
         match self {
             // Paths are workspace-root relative, as in `layers`.
-            Guard::Test(path) if !root.join(path).exists() => Some(path),
+            Guard::Test(path) | Guard::Script(path) if !root.join(path).exists() => Some(path),
             _ => None,
         }
     }
@@ -91,6 +95,10 @@ impl Guard {
         };
         match key {
             "twrit" => Ok(Guard::Twrit(text)),
+            "script" if text.trim().is_empty() => {
+                anyhow::bail!("`@rule({id})`'s `guard: script` names no script path")
+            }
+            "script" => Ok(Guard::Script(text)),
             "runs" => Ok(Guard::Runs(text)),
             "test" => Ok(Guard::Test(text)),
             "none" if text.trim().is_empty() => anyhow::bail!(
@@ -100,7 +108,7 @@ impl Guard {
             "none" => Ok(Guard::None(text)),
             other => anyhow::bail!(
                 "`@rule({id})`'s guard holder `{other}` is not one of \
-                 `twrit`, `runs`, `test`, `none`"
+                 `twrit`, `script`, `runs`, `test`, `none`"
             ),
         }
     }
@@ -110,6 +118,8 @@ impl Guard {
 pub struct Rule {
     pub id: String,
     pub guard: Guard,
+    pub why: Option<String>,
+    pub description: Option<String>,
     /// Which writ it came from, so a violation can name the file.
     pub path: PathBuf,
     group: Vec<Entry>,
@@ -296,15 +306,62 @@ impl Writ {
             );
         };
 
+        let description = view
+            .content
+            .filter(|blocks| !blocks.is_empty())
+            .map(render_blocks)
+            .filter(|s| !s.is_empty());
+
+        let why = match group.iter().find_map(|entry| match entry {
+            Entry::Pair(k, v) if k == "why" => Some(v),
+            _ => None,
+        }) {
+            Some(Value::Blocks(blocks)) => {
+                let rendered = render_blocks(blocks);
+                anyhow::ensure!(
+                    !rendered.is_empty(),
+                    "{}: `@rule({id})`'s `why` is empty",
+                    self.path.display()
+                );
+                Some(rendered)
+            }
+            Some(Value::Scalar(Scalar::Text(s))) => {
+                let trimmed = s.trim();
+                anyhow::ensure!(
+                    !trimmed.is_empty(),
+                    "{}: `@rule({id})`'s `why` is empty",
+                    self.path.display()
+                );
+                Some(trimmed.to_string())
+            }
+            Some(other) => anyhow::bail!(
+                "{}: `@rule({id})`'s `why` must be prose (`| ...`) or a string, found: {other:?}",
+                self.path.display()
+            ),
+            None => None,
+        };
+
         Ok(Rule {
             id: id.clone(),
             guard: Guard::from_tuple(guard, &id)
                 .with_context(|| format!("{}", self.path.display()))?,
+            why,
+            description,
             path: self.path.clone(),
             group: group.clone(),
             bindings: self.bindings.clone(),
         })
     }
+}
+
+fn render_blocks(blocks: &[Block]) -> String {
+    tomet_printer::document_to_tm(&File::new(
+        Vec::new(),
+        blocks.to_vec(),
+        tomet_span::Span::dummy(),
+    ))
+    .trim()
+    .to_string()
 }
 
 /// Every rule across `writs` whose guard names `kind` as this tool's.

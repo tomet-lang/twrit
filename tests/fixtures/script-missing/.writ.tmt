@@ -1,0 +1,9 @@
+::kind(writ)
+
+=[ Writ: script-missing fixture ]
+
+==[ missing-script ]
+
+@rule(missing-script){
+  guard: ( script: "scripts/missing.sh" )
+}
