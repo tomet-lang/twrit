@@ -29,16 +29,19 @@ A *writ* is an author-owned normative document, scoped to its directory and inhe
 ==[ Building and Testing ]
 
 === Build workspace
+
 ```bash
-cargo build
+`` cargo build
 ```
 
 === Run tests
+
 ```bash
-cargo test --workspace
+`` cargo test --workspace
 ```
 
 === Check repository rules
+
 ```bash
-cargo run -p twrit-cli -- check .
+`` cargo run -p twrit-cli -- check .
 ```

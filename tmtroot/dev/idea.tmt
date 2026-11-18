@@ -1,4 +1,7 @@
+- Conform（規約検査）, Goodcheck（正規表現ルール）, OPA / Conftest（Rego言語での設定検査）
+- アーキテクチャ検査ツール: ArchUnit, dependency-cruiser, cargo-deny
 - ArchUnit: Java
 - Deptrac: PHP
 - Tach: Python
 - dependency-cruiser: JS
+- メディアとの接続を検証する部分もtwritが担うべき？

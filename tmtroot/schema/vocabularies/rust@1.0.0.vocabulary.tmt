@@ -10,8 +10,5 @@
         type: string
         positional: true
         required: true
-        about: | The crate name (e.g. "twrit-core", "tomet-parser").
-      )
-    )
-  )
-)
+        about: | The crate name (e.g. "my-crate-core", "my-crate-cli").
+))))
