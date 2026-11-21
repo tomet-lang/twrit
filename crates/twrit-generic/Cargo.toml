@@ -1,5 +1,5 @@
 [package]
-name = "twrit-generic"
+name              = "twrit-generic"
 version.workspace = true
 edition.workspace = true
 
@@ -7,11 +7,11 @@ edition.workspace = true
 twrit-core = { workspace = true }
 
 #= Tomet
-tomet-ast = { workspace = true }
+tomet-ast     = { workspace = true }
 tomet-extract = { workspace = true }
-tomet-scalar = { workspace = true }
+tomet-scalar  = { workspace = true }
 
 #= Crates.io
-anyhow = { workspace = true }
-ignore = { workspace = true }
+anyhow  = { workspace = true }
+ignore  = { workspace = true }
 walkdir = { workspace = true }

@@ -1,18 +1,18 @@
 [package]
-name = "twrit-core"
+name              = "twrit-core"
 version.workspace = true
 edition.workspace = true
 
 [dependencies]
 #= Tomet
-tomet-ast = { workspace = true }
-tomet-load = { workspace = true }
-tomet-printer = { workspace = true }
-tomet-scalar = { workspace = true }
+tomet-ast       = { workspace = true }
+tomet-load      = { workspace = true }
+tomet-printer   = { workspace = true }
+tomet-scalar    = { workspace = true }
 tomet-semantics = { workspace = true }
-tomet-span = { workspace = true }
+tomet-span      = { workspace = true }
 
 #= Crates.io
-anyhow = { workspace = true }
-ignore = { workspace = true }
+anyhow         = { workspace = true }
+ignore         = { workspace = true }
 jobserver-gate = { workspace = true }

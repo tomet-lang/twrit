@@ -71,38 +71,36 @@ pub fn file_references_capability(content: &str, needle_names: &[String]) -> Vec
     let mut hits = Vec::new();
 
     // 1. AST check for imports
-    if let Ok(ast) = parse(content, Mode::Module, "<source>") {
-        if let Mod::Module(m) = ast {
-            for stmt in m.body {
-                match stmt {
-                    Stmt::Import(imp) => {
-                        for alias in imp.names {
-                            let name = alias.name.as_str();
-                            for needle in needle_names {
-                                if name == needle || name.starts_with(&format!("{needle}.")) {
-                                    hits.push(needle.clone());
-                                }
+    if let Ok(Mod::Module(m)) = parse(content, Mode::Module, "<source>") {
+        for stmt in m.body {
+            match stmt {
+                Stmt::Import(imp) => {
+                    for alias in imp.names {
+                        let name = alias.name.as_str();
+                        for needle in needle_names {
+                            if name == needle || name.starts_with(&format!("{needle}.")) {
+                                hits.push(needle.clone());
                             }
                         }
                     }
-                    Stmt::ImportFrom(imp) => {
-                        if let Some(module) = &imp.module {
-                            let mod_str = module.as_str();
-                            for needle in needle_names {
-                                if mod_str == needle || mod_str.starts_with(&format!("{needle}.")) {
-                                    hits.push(needle.clone());
-                                }
-                                for alias in &imp.names {
-                                    let full = format!("{mod_str}.{}", alias.name.as_str());
-                                    if full == *needle {
-                                        hits.push(needle.clone());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    _ => {}
                 }
+                Stmt::ImportFrom(imp) => {
+                    if let Some(module) = &imp.module {
+                        let mod_str = module.as_str();
+                        for needle in needle_names {
+                            if mod_str == needle || mod_str.starts_with(&format!("{needle}.")) {
+                                hits.push(needle.clone());
+                            }
+                            for alias in &imp.names {
+                                let full = format!("{mod_str}.{}", alias.name.as_str());
+                                if full == *needle {
+                                    hits.push(needle.clone());
+                                }
+                            }
+                        }
+                    }
+                }
+                _ => {}
             }
         }
     }

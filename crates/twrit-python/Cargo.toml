@@ -1,5 +1,5 @@
 [package]
-name = "twrit-python"
+name              = "twrit-python"
 version.workspace = true
 edition.workspace = true
 
@@ -7,17 +7,17 @@ edition.workspace = true
 twrit-core = { workspace = true }
 
 #= Tomet
-tomet-ast = { workspace = true }
-tomet-formatter = { workspace = true }
+tomet-ast        = { workspace = true }
 tomet-ast-parser = { workspace = true }
-tomet-printer = { workspace = true }
-tomet-scalar = { workspace = true }
-tomet-span = { workspace = true }
-tomet-tree = { workspace = true }
+tomet-formatter  = { workspace = true }
+tomet-printer    = { workspace = true }
+tomet-scalar     = { workspace = true }
+tomet-span       = { workspace = true }
+tomet-tree       = { workspace = true }
 
 #= Crates.io
-anyhow = { workspace = true }
-ignore = { workspace = true }
-rustpython-ast = { workspace = true }
+anyhow            = { workspace = true }
+ignore            = { workspace = true }
+rustpython-ast    = { workspace = true }
 rustpython-parser = { workspace = true }
-walkdir = { workspace = true }
+walkdir           = { workspace = true }

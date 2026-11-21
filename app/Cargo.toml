@@ -1,5 +1,5 @@
 [package]
-name = "twrit-cli"
+name              = "twrit-cli"
 version.workspace = true
 edition.workspace = true
 
@@ -8,13 +8,13 @@ name = "twrit"
 path = "src/main.rs"
 
 [dependencies]
-twrit-core = { workspace = true }
-twrit-rust = { workspace = true }
-twrit-python = { workspace = true }
+twrit-core    = { workspace = true }
 twrit-generic = { workspace = true }
+twrit-python  = { workspace = true }
+twrit-rust    = { workspace = true }
 
 #= Crates.io
-anyhow = { workspace = true }
-clap = { workspace = true }
+anyhow         = { workspace = true }
+clap           = { workspace = true }
 jobserver-gate = { workspace = true }
-mimalloc = { workspace = true }
+mimalloc       = { workspace = true }

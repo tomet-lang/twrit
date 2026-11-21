@@ -207,10 +207,8 @@ impl<'a> CrateItemCollector<'a> {
                         constants.push((c.ident.to_string(), &c.attrs));
                     }
                 }
-                syn::Item::Static(s) => {
-                    if self.is_visible(&s.vis) && !is_doc_hidden(&s.attrs) {
-                        constants.push((s.ident.to_string(), &s.attrs));
-                    }
+                syn::Item::Static(s) if self.is_visible(&s.vis) && !is_doc_hidden(&s.attrs) => {
+                    constants.push((s.ident.to_string(), &s.attrs));
                 }
                 _ => {}
             }
@@ -426,18 +424,16 @@ fn extract_docs(attrs: &[syn::Attribute], inner: bool) -> String {
         if !is_target_style {
             continue;
         }
-        if let syn::Meta::NameValue(meta) = &attr.meta {
-            if meta.path.is_ident("doc") {
-                if let syn::Expr::Lit(syn::ExprLit {
-                    lit: syn::Lit::Str(lit_str),
-                    ..
-                }) = &meta.value
-                {
-                    let val = lit_str.value();
-                    let line = val.strip_prefix(' ').unwrap_or(&val);
-                    doc_lines.push(line.to_string());
-                }
-            }
+        if let syn::Meta::NameValue(meta) = &attr.meta
+            && meta.path.is_ident("doc")
+            && let syn::Expr::Lit(syn::ExprLit {
+                lit: syn::Lit::Str(lit_str),
+                ..
+            }) = &meta.value
+        {
+            let val = lit_str.value();
+            let line = val.strip_prefix(' ').unwrap_or(&val);
+            doc_lines.push(line.to_string());
         }
     }
     if doc_lines.is_empty() {
@@ -450,16 +446,15 @@ fn extract_docs(attrs: &[syn::Attribute], inner: bool) -> String {
 /// Checks if an item has `#[doc(hidden)]`.
 fn is_doc_hidden(attrs: &[syn::Attribute]) -> bool {
     for attr in attrs {
-        if let syn::Meta::List(meta) = &attr.meta {
-            if meta.path.is_ident("doc") {
-                if let Ok(nested) = attr.parse_args_with(
-                    syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
-                ) {
-                    for m in nested {
-                        if m.path().is_ident("hidden") {
-                            return true;
-                        }
-                    }
+        if let syn::Meta::List(meta) = &attr.meta
+            && meta.path.is_ident("doc")
+            && let Ok(nested) = attr.parse_args_with(
+                syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+            )
+        {
+            for m in nested {
+                if m.path().is_ident("hidden") {
+                    return true;
                 }
             }
         }

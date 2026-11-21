@@ -1,4 +1,4 @@
 [package]
-name = "top"
+name    = "top"
 version = "0.1.0"
 edition = "2024"

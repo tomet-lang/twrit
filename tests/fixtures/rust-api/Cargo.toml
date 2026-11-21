@@ -2,6 +2,6 @@
 resolver = "3"
 
 [package]
-name = "fixture-api-test"
+name    = "fixture-api-test"
 version = "0.1.0"
 edition = "2024"

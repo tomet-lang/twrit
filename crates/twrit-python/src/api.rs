@@ -91,12 +91,13 @@ impl PythonApiConfig {
 
 /// Extracts docstring from body of module, class, or function.
 fn extract_docstring(body: &[Stmt]) -> Option<String> {
-    if let Some(Stmt::Expr(expr_stmt)) = body.first() {
-        if let Expr::Constant(ExprConstant { value, .. }) = &*expr_stmt.value {
-            if let rustpython_ast::Constant::Str(s) = value {
-                return Some(s.clone());
-            }
-        }
+    if let Some(Stmt::Expr(expr_stmt)) = body.first()
+        && let Expr::Constant(ExprConstant {
+            value: rustpython_ast::Constant::Str(s),
+            ..
+        }) = &*expr_stmt.value
+    {
+        return Some(s.clone());
     }
     None
 }

@@ -1,8 +1,8 @@
 [book]
 title = "twrit docs"
-lang = "en"
-dest = "dist"
+lang  = "en"
+dest  = "dist"
 
 [build]
-base = "/twrit"
+base  = "/twrit"
 kinds = ["*", "!config", "!index"]

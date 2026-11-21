@@ -17,49 +17,49 @@ exclude = ["tests/fixtures"]
 default-members = ["app"]
 
 [workspace.package]
-version = "0.4.0"
-edition = "2024"
+version      = "0.4.0"
+edition      = "2024"
 rust-version = "1.85"
 
 [workspace.dependencies]
-twrit-core = { path = "crates/twrit-core" }
-twrit-rust = { path = "crates/twrit-rust" }
-twrit-python = { path = "crates/twrit-python" }
+twrit-cli     = { path = "app" }
+twrit-core    = { path = "crates/twrit-core" }
 twrit-generic = { path = "crates/twrit-generic" }
-twrit-cli = { path = "app" }
+twrit-python  = { path = "crates/twrit-python" }
+twrit-rust    = { path = "crates/twrit-rust" }
 
 jobserver-gate = { git = "https://github.com/tomet-lang/jobserver-gate.git" }
 
 #= Tomet
-tomet-ast = { git = "https://github.com/tomet-lang/tomet.git" }
-tomet-extract = { git = "https://github.com/tomet-lang/tomet.git" }
-tomet-formatter = { git = "https://github.com/tomet-lang/tomet.git" }
-tomet-load = { git = "https://github.com/tomet-lang/tomet.git" }
+tomet-ast        = { git = "https://github.com/tomet-lang/tomet.git" }
 tomet-ast-parser = { git = "https://github.com/tomet-lang/tomet.git" }
-tomet-printer = { git = "https://github.com/tomet-lang/tomet.git" }
-tomet-scalar = { git = "https://github.com/tomet-lang/tomet.git" }
-tomet-semantics = { git = "https://github.com/tomet-lang/tomet.git" }
-tomet-span = { git = "https://github.com/tomet-lang/tomet.git" }
-tomet-tree = { git = "https://github.com/tomet-lang/tomet.git" }
+tomet-extract    = { git = "https://github.com/tomet-lang/tomet.git" }
+tomet-formatter  = { git = "https://github.com/tomet-lang/tomet.git" }
+tomet-load       = { git = "https://github.com/tomet-lang/tomet.git" }
+tomet-printer    = { git = "https://github.com/tomet-lang/tomet.git" }
+tomet-scalar     = { git = "https://github.com/tomet-lang/tomet.git" }
+tomet-semantics  = { git = "https://github.com/tomet-lang/tomet.git" }
+tomet-span       = { git = "https://github.com/tomet-lang/tomet.git" }
+tomet-tree       = { git = "https://github.com/tomet-lang/tomet.git" }
 
 #= Crates.io
-anyhow = "1"
-cargo_metadata = "0.23"
-clap = { version = "4.6", features = ["derive"] }
-ignore = "0.4"
-mimalloc = { version = "0.1", default-features = false }
-rayon = "1"
-rustpython-ast = "0.4"
+anyhow            = "1"
+cargo_metadata    = "0.23"
+clap              = { version = "4.6", features = ["derive"] }
+ignore            = "0.4"
+mimalloc          = { version = "0.1", default-features = false }
+rayon             = "1"
+rustpython-ast    = "0.4"
 rustpython-parser = "0.4"
-syn = { version = "2.0", features = ["full", "visit"] }
-walkdir = "2"
+syn               = { version = "2.0", features = ["full", "visit"] }
+walkdir           = "2"
 
 [profile.release]
-opt-level = 3
-lto = "fat"
+opt-level     = 3
+lto           = "fat"
 codegen-units = 1
-panic = "abort"
-strip = true
+panic         = "abort"
+strip         = true
 
 [profile.dev.package."*"]
 opt-level = 3
